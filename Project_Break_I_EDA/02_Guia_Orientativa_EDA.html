@@ -1,0 +1,1382 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guía EDA · Exploratory Data Analysis</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f0f8fa;
+    --sidebar-bg: #e2f4f7;
+    --card-bg: #ffffff;
+    --accent-1: #4ab8c8;
+    --accent-2: #7dd4de;
+    --accent-3: #a8e6ef;
+    --accent-4: #cef3f8;
+    --teal-dark: #2a8a9a;
+    --teal-mid: #3ea8ba;
+    --text-main: #1e3a40;
+    --text-muted: #6a9aa4;
+    --text-light: #9ec5cc;
+    --phase-1: #b8e8f0;
+    --phase-2: #a2dfea;
+    --phase-3: #8dd5e3;
+    --phase-4: #75cadc;
+    --phase-5: #5ebfd3;
+    --code-bg: #1e3a40;
+    --code-text: #a8e6ef;
+    --border: #d0edf2;
+    --shadow: 0 4px 24px rgba(74,184,200,0.10);
+    --shadow-hover: 0 8px 32px rgba(74,184,200,0.20);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text-main);
+    display: flex;
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  /* ── SIDEBAR ── */
+  #sidebar {
+    width: 270px;
+    min-width: 270px;
+    background: var(--sidebar-bg);
+    border-right: 1.5px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 0 0 32px 0;
+  }
+
+  .sidebar-header {
+    padding: 32px 24px 20px;
+    border-bottom: 1.5px solid var(--border);
+  }
+
+  .sidebar-header .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    color: var(--teal-dark);
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+  }
+
+  .sidebar-header .subtitle {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 4px;
+    font-weight: 500;
+  }
+
+  .sidebar-progress {
+    padding: 16px 24px;
+    border-bottom: 1.5px solid var(--border);
+  }
+
+  .progress-label {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+
+  .progress-bar-bg {
+    background: var(--accent-4);
+    border-radius: 99px;
+    height: 6px;
+    width: 100%;
+  }
+
+  .progress-bar-fill {
+    background: linear-gradient(90deg, var(--teal-dark), var(--accent-1));
+    height: 6px;
+    border-radius: 99px;
+    width: 0%;
+    transition: width 0.5s ease;
+  }
+
+  .progress-count {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-top: 5px;
+    text-align: right;
+  }
+
+  .nav-phases {
+    padding: 16px 0;
+  }
+
+  .nav-phase-title {
+    padding: 6px 24px 4px;
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-light);
+    font-weight: 600;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 24px;
+    cursor: pointer;
+    border-radius: 0 8px 8px 0;
+    margin-right: 12px;
+    transition: background 0.2s, color 0.2s;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+
+  .nav-item:hover {
+    background: var(--accent-4);
+    color: var(--teal-dark);
+  }
+
+  .nav-item.active {
+    background: var(--accent-3);
+    color: var(--teal-dark);
+    font-weight: 500;
+  }
+
+  .nav-item .nav-num {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 600;
+    flex-shrink: 0;
+    color: var(--teal-mid);
+    transition: background 0.2s;
+  }
+
+  .nav-item.active .nav-num,
+  .nav-item:hover .nav-num {
+    background: var(--accent-1);
+    color: white;
+  }
+
+  .nav-item .nav-done {
+    margin-left: auto;
+    color: var(--accent-1);
+    font-size: 0.9rem;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .nav-item.done .nav-done { opacity: 1; }
+
+  /* ── MAIN ── */
+  #main {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+  }
+
+  .main-hero {
+    background: linear-gradient(135deg, var(--teal-dark) 0%, var(--teal-mid) 40%, var(--accent-1) 100%);
+    padding: 56px 60px 48px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .main-hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 300px; height: 300px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+  }
+
+  .main-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; left: 30%;
+    width: 400px; height: 400px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+  }
+
+  .hero-tag {
+    display: inline-block;
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 99px;
+    padding: 4px 14px;
+    font-size: 0.72rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.8rem;
+    line-height: 1.15;
+    margin-bottom: 14px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-desc {
+    font-size: 0.95rem;
+    opacity: 0.85;
+    max-width: 580px;
+    line-height: 1.7;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 32px;
+    margin-top: 32px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-stat {
+    text-align: center;
+  }
+
+  .hero-stat .num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .hero-stat .lbl {
+    font-size: 0.72rem;
+    opacity: 0.7;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-top: 3px;
+  }
+
+  /* ── PHASES ── */
+  .content-area {
+    padding: 40px 60px;
+  }
+
+  .phase-block {
+    margin-bottom: 48px;
+  }
+
+  .phase-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .phase-badge {
+    padding: 6px 18px;
+    border-radius: 99px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--teal-dark);
+  }
+
+  .ph1 { background: var(--phase-1); }
+  .ph2 { background: var(--phase-2); }
+  .ph3 { background: var(--phase-3); }
+  .ph4 { background: var(--phase-4); }
+  .ph5 { background: var(--phase-5); color: white; }
+
+  .phase-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    color: var(--teal-dark);
+  }
+
+  /* ── STEP CARDS ── */
+  .step-card {
+    background: var(--card-bg);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    margin-bottom: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: box-shadow 0.25s;
+  }
+
+  .step-card:hover {
+    box-shadow: var(--shadow-hover);
+  }
+
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 22px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s;
+  }
+
+  .step-header:hover { background: #f6fcfd; }
+
+  .step-num {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--accent-4);
+    color: var(--teal-dark);
+    font-size: 0.78rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .step-title-wrap {
+    flex: 1;
+  }
+
+  .step-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text-main);
+  }
+
+  .step-title .en-term {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--teal-mid);
+    background: var(--accent-4);
+    padding: 1px 6px;
+    border-radius: 4px;
+    margin-left: 6px;
+    font-weight: 500;
+  }
+
+  .step-subtitle {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-top: 1px;
+  }
+
+  .step-toggle {
+    color: var(--text-light);
+    font-size: 1.1rem;
+    transition: transform 0.3s;
+    flex-shrink: 0;
+  }
+
+  .step-card.open .step-toggle { transform: rotate(180deg); }
+
+  .step-card.open .step-num {
+    background: var(--accent-1);
+    color: white;
+  }
+
+  .step-body {
+    display: none;
+    padding: 0 22px 20px 68px;
+    border-top: 1.5px solid var(--border);
+    animation: fadeIn 0.25s ease;
+  }
+
+  .step-card.open .step-body { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .step-desc {
+    margin: 14px 0 10px;
+    font-size: 0.9rem;
+    color: #3a6070;
+    line-height: 1.75;
+  }
+
+  .tip-box {
+    background: linear-gradient(135deg, #eaf8fb, #f0fcfe);
+    border-left: 3px solid var(--accent-1);
+    border-radius: 0 8px 8px 0;
+    padding: 10px 14px;
+    font-size: 0.83rem;
+    color: var(--teal-dark);
+    margin: 10px 0 14px;
+  }
+
+  .tip-box strong { font-weight: 600; }
+
+  /* ── CODE BLOCKS ── */
+  .code-block {
+    background: var(--code-bg);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 14px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    line-height: 1.7;
+  }
+
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    background: rgba(255,255,255,0.05);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .code-lang {
+    color: var(--accent-1);
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .copy-btn {
+    background: none;
+    border: 1px solid rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.5);
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .copy-btn:hover {
+    border-color: var(--accent-1);
+    color: var(--accent-1);
+  }
+
+  .copy-btn.copied {
+    border-color: #6ee0c8;
+    color: #6ee0c8;
+  }
+
+  .code-content {
+    padding: 16px;
+    color: var(--code-text);
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  .kw { color: #79b8ff; }     /* keywords */
+  .fn { color: #b3d9ff; }     /* functions */
+  .st { color: #9de0c8; }     /* strings */
+  .cm { color: #5a7a84; font-style: italic; } /* comments */
+  .nb { color: #f7c59f; }     /* numbers */
+  .cl { color: #ffd980; }     /* class names */
+  .op { color: #a8e6ef; }     /* operators */
+
+  /* ── CHECKLIST ── */
+  .checklist {
+    list-style: none;
+    margin: 12px 0;
+  }
+
+  .checklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 5px 0;
+    font-size: 0.88rem;
+    color: #3a6070;
+    cursor: pointer;
+  }
+
+  .checklist li .check-box {
+    width: 17px;
+    height: 17px;
+    border: 2px solid var(--accent-1);
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+  }
+
+  .checklist li.checked .check-box {
+    background: var(--accent-1);
+    border-color: var(--accent-1);
+  }
+
+  .checklist li.checked .check-box::after {
+    content: '✓';
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+  }
+
+  .checklist li.checked span {
+    text-decoration: line-through;
+    opacity: 0.5;
+  }
+
+  /* ── DIVIDER ── */
+  .phase-divider {
+    height: 1.5px;
+    background: linear-gradient(90deg, var(--border), transparent);
+    margin: 40px 0;
+  }
+
+  /* ── SCROLLBAR ── */
+  #sidebar::-webkit-scrollbar,
+  #main::-webkit-scrollbar { width: 5px; }
+  #sidebar::-webkit-scrollbar-track,
+  #main::-webkit-scrollbar-track { background: transparent; }
+  #sidebar::-webkit-scrollbar-thumb,
+  #main::-webkit-scrollbar-thumb { background: var(--accent-3); border-radius: 99px; }
+</style>
+</head>
+<body>
+
+<!-- ════════════ SIDEBAR ════════════ -->
+<nav id="sidebar">
+  <div class="sidebar-header">
+    <div class="logo">Guía EDA</div>
+    <div class="subtitle">Exploratory Data Analysis</div>
+  </div>
+
+  <div class="sidebar-progress">
+    <div class="progress-label">Progreso</div>
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressBar"></div></div>
+    <div class="progress-count" id="progressCount">0 / 25 pasos</div>
+  </div>
+
+  <div class="nav-phases">
+    <div class="nav-phase-title">Fases</div>
+
+    <div class="nav-item" onclick="scrollTo('phase1')">
+      <span class="nav-num">1</span> Business Case & Data
+      <span class="nav-done">✓</span>
+    </div>
+    <div class="nav-item" onclick="scrollTo('phase2')">
+      <span class="nav-num">2</span> Data Understanding
+      <span class="nav-done">✓</span>
+    </div>
+    <div class="nav-item" onclick="scrollTo('phase3')">
+      <span class="nav-num">3</span> Data Cleaning
+      <span class="nav-done">✓</span>
+    </div>
+    <div class="nav-item" onclick="scrollTo('phase4')">
+      <span class="nav-num">4</span> Analysis
+      <span class="nav-done">✓</span>
+    </div>
+    <div class="nav-item" onclick="scrollTo('phase5')">
+      <span class="nav-num">5</span> Resultados
+      <span class="nav-done">✓</span>
+    </div>
+  </div>
+</nav>
+
+<!-- ════════════ MAIN ════════════ -->
+<main id="main">
+
+  <div class="main-hero">
+    <div class="hero-tag">Data Analysis · Python · Pandas</div>
+    <h1 class="hero-title">Guía Orientativa<br>de EDA</h1>
+    <p class="hero-desc">Un proceso estructurado en 25 pasos para limpiar, entender y extraer valor de tus datos. Desde la definición del problema de negocio hasta la comunicación de resultados.</p>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="num">5</div><div class="lbl">Fases</div></div>
+      <div class="hero-stat"><div class="num">25</div><div class="lbl">Pasos</div></div>
+      <div class="hero-stat"><div class="num">20+</div><div class="lbl">Snippets</div></div>
+    </div>
+  </div>
+
+  <div class="content-area">
+
+    <!-- ── FASE 1 ── -->
+    <div class="phase-block" id="phase1">
+      <div class="phase-header">
+        <span class="phase-badge ph1">Fase 01</span>
+        <h2 class="phase-title">Business Case & Data Collection</h2>
+      </div>
+
+      <!-- PASO 1 -->
+      <div class="step-card" id="step-1">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">01</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Business Understanding</div>
+            <div class="step-subtitle">Identifica el problema de negocio que quieres resolver</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Antes de tocar ningún dato, define con precisión qué pregunta intentas responder. Un EDA sin objetivo es solo una exploración sin dirección. Escribe una <strong>problem statement</strong> en una sola frase.</p>
+          <div class="tip-box"><strong>💡 Tip:</strong> «¿Qué variables explican la tasa de abandono de clientes en los últimos 6 meses?» es un buen punto de partida. Evita objetivos vagos como «entender los datos».</div>
+          <ul class="checklist">
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Problem statement definida en una frase</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Stakeholders identificados</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Métricas de éxito establecidas</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- PASO 2 -->
+      <div class="step-card" id="step-2">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">02</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Hipótesis y plan de acción</div>
+            <div class="step-subtitle">Formula afirmaciones comprobables sobre los datos</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Formula hipótesis concretas y define qué harás si se confirman o se refutan. Sin un plan de acción, los hallazgos no generan valor.</p>
+          <div class="tip-box"><strong>💡 Ejemplo:</strong> H1: «Los clientes con antigüedad &lt; 6 meses tienen el doble de tasa de abandono». Si es verdad → campaña de retención temprana. Si es falso → buscar otras variables.</div>
+          <ul class="checklist">
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Al menos 3 hipótesis formuladas</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Plan de acción por cada hipótesis</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- PASO 3 -->
+      <div class="step-card" id="step-3">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">03</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Requerimientos de los datos</div>
+            <div class="step-subtitle">Lista los datos necesarios a alto nivel</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Identifica qué datos necesitas: granularidad, rango temporal, fuentes, y variables mínimas imprescindibles para validar tus hipótesis.</p>
+          <ul class="checklist">
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Fuentes de datos listadas</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Granularidad y ventana temporal definidas</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Variables mínimas necesarias identificadas</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- PASO 4 -->
+      <div class="step-card" id="step-4">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">04</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Disponibilidad</div>
+            <div class="step-subtitle">Primer punto de inflexión del proyecto</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Verifica si los datos existen y si tienes acceso legal y técnico a ellos. Si no es posible, replantea el proyecto antes de invertir más tiempo.</p>
+          <ul class="checklist">
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Datos accesibles confirmado</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Permisos y licencias revisados</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- PASO 5 -->
+      <div class="step-card" id="step-5">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">05</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Adquisición de datos <span class="en-term">Data Acquisition</span></div>
+            <div class="step-subtitle">Carga datos desde distintas fuentes</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Carga los datos desde su origen: CSV, base de datos, API, web scraping o dataset público.</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">Python · Pandas</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+            <div class="code-content"><span class="kw">import</span> pandas <span class="kw">as</span> pd
+
+<span class="cm"># Desde CSV</span>
+df = pd.<span class="fn">read_csv</span>(<span class="st">'datos.csv'</span>, encoding=<span class="st">'utf-8'</span>)
+
+<span class="cm"># Desde Excel</span>
+df = pd.<span class="fn">read_excel</span>(<span class="st">'datos.xlsx'</span>, sheet_name=<span class="st">'Sheet1'</span>)
+
+<span class="cm"># Desde base de datos SQL</span>
+<span class="kw">import</span> sqlalchemy
+engine = sqlalchemy.<span class="fn">create_engine</span>(<span class="st">'postgresql://user:pwd@host/db'</span>)
+df = pd.<span class="fn">read_sql</span>(<span class="st">"SELECT * FROM clientes"</span>, engine)
+
+<span class="cm"># Desde API (ejemplo JSON)</span>
+<span class="kw">import</span> requests
+response = requests.<span class="fn">get</span>(<span class="st">'https://api.ejemplo.com/datos'</span>)
+df = pd.<span class="fn">DataFrame</span>(response.<span class="fn">json</span>())</div>
+          </div>
+          <ul class="checklist">
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Datos cargados correctamente en DataFrame</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Backup del raw data guardado</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- PASO 6 -->
+      <div class="step-card" id="step-6">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">06</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Calidad de los datos <span class="en-term">Data Quality</span></div>
+            <div class="step-subtitle">Segundo punto de inflexión del proyecto</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Evalúa si los datos son suficientes, válidos y representativos. Demasiados <em>missings</em> o datos manipulados pueden invalidar el análisis.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python · Pandas</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+            <div class="code-content"><span class="cm"># Resumen rápido de calidad</span>
+<span class="kw">def</span> <span class="fn">calidad_datos</span>(df):
+    resumen = pd.<span class="fn">DataFrame</span>({
+        <span class="st">'dtype'</span>: df.dtypes,
+        <span class="st">'nulos'</span>: df.<span class="fn">isnull</span>().<span class="fn">sum</span>(),
+        <span class="st">'pct_nulos'</span>: (df.<span class="fn">isnull</span>().<span class="fn">sum</span>() <span class="op">/</span> <span class="fn">len</span>(df) <span class="op">*</span> <span class="nb">100</span>).<span class="fn">round</span>(<span class="nb">2</span>),
+        <span class="st">'unicos'</span>: df.<span class="fn">nunique</span>()
+    })
+    <span class="kw">return</span> resumen
+
+<span class="fn">print</span>(<span class="fn">calidad_datos</span>(df))</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PASO 7 -->
+      <div class="step-card" id="step-7">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">07</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Revisión de hipótesis</div>
+            <div class="step-subtitle">Ajusta los objetivos al dato real disponible</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Una vez vistos los datos reales, ajusta o reformula las hipótesis. Es normal tener que pivotarlas: los datos mandan.</p>
+          <ul class="checklist">
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Hipótesis revisadas contra datos disponibles</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Variables descartadas o añadidas</span></li>
+          </ul>
+        </div>
+      </div>
+    </div><!-- /phase1 -->
+
+    <div class="phase-divider"></div>
+
+    <!-- ── FASE 2 ── -->
+    <div class="phase-block" id="phase2">
+      <div class="phase-header">
+        <span class="phase-badge ph2">Fase 02</span>
+        <h2 class="phase-title">Data Understanding</h2>
+      </div>
+
+      <!-- PASO 8 -->
+      <div class="step-card" id="step-8">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">08</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Exploratorio inicial <span class="en-term">First Look</span></div>
+            <div class="step-subtitle">Obtén la visión general del dataset</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Primer vistazo al dataset: dimensiones, tipos, primeros y últimos registros, y proporción de <em>missings</em>.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python · Pandas</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+            <div class="code-content"><span class="cm"># Dimensiones</span>
+<span class="fn">print</span>(<span class="st">f"Filas: {df.shape[0]:,} | Columnas: {df.shape[1]}"</span>)
+
+<span class="cm"># Tipos y primeros valores</span>
+df.<span class="fn">head</span>()
+df.<span class="fn">tail</span>()
+df.<span class="fn">info</span>()
+
+<span class="cm"># Estadísticos básicos</span>
+df.<span class="fn">describe</span>(include=<span class="st">'all'</span>)
+
+<span class="cm"># Missings por columna</span>
+df.<span class="fn">isnull</span>().<span class="fn">sum</span>().<span class="fn">sort_values</span>(ascending=<span class="kw">False</span>)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PASO 9 -->
+      <div class="step-card" id="step-9">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">09</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Tabla de variables <span class="en-term">Data Dictionary</span></div>
+            <div class="step-subtitle">Inventaria y documenta cada columna</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Documenta qué es cada variable, su tipo, si es continua/categórica, y qué crees que va a aportar. Una hoja de cálculo funciona perfectamente.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python · Pandas</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+            <div class="code-content"><span class="cm"># Genera un data dictionary automático</span>
+data_dict = pd.<span class="fn">DataFrame</span>({
+    <span class="st">'columna'</span>: df.columns,
+    <span class="st">'dtype'</span>: df.dtypes.<span class="fn">values</span>,
+    <span class="st">'nulos_pct'</span>: (df.<span class="fn">isnull</span>().<span class="fn">mean</span>() <span class="op">*</span> <span class="nb">100</span>).<span class="fn">round</span>(<span class="nb">1</span>).<span class="fn">values</span>,
+    <span class="st">'unicos'</span>: df.<span class="fn">nunique</span>().<span class="fn">values</span>,
+    <span class="st">'ejemplo'</span>: [df[c].<span class="fn">dropna</span>().<span class="fn">iloc</span>[<span class="nb">0</span>] <span class="kw">if</span> <span class="fn">len</span>(df[c].<span class="fn">dropna</span>()) <span class="op">></span> <span class="nb">0</span> <span class="kw">else</span> <span class="kw">None</span> <span class="kw">for</span> c <span class="kw">in</span> df.columns]
+})
+data_dict.<span class="fn">to_csv</span>(<span class="st">'data_dictionary.csv'</span>, index=<span class="kw">False</span>)
+data_dict</div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /phase2 -->
+
+    <div class="phase-divider"></div>
+
+    <!-- ── FASE 3 ── -->
+    <div class="phase-block" id="phase3">
+      <div class="phase-header">
+        <span class="phase-badge ph3">Fase 03</span>
+        <h2 class="phase-title">Data Cleaning</h2>
+      </div>
+
+      <!-- PASO 10 -->
+      <div class="step-card" id="step-10">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">10</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Unión de tablas <span class="en-term">Merge / Join</span></div>
+            <div class="step-subtitle">Consolida fuentes de datos en una sola tabla</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Si tus datos vienen de varias fuentes, únalos usando la clave común. Elige el tipo de <em>join</em> que tenga sentido para tu análisis.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python · Pandas</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+            <div class="code-content"><span class="cm"># Inner join — solo registros comunes</span>
+df_merged = pd.<span class="fn">merge</span>(df1, df2, on=<span class="st">'id_cliente'</span>, how=<span class="st">'inner'</span>)
+
+<span class="cm"># Left join — todos los de df1 aunque no estén en df2</span>
+df_merged = pd.<span class="fn">merge</span>(df1, df2, on=<span class="st">'id_cliente'</span>, how=<span class="st">'left'</span>)
+
+<span class="cm"># Apilar filas del mismo esquema</span>
+df_total = pd.<span class="fn">concat</span>([df_2023, df_2024], ignore_index=<span class="kw">True</span>)
+
+<span class="fn">print</span>(<span class="st">f"Registros resultado: {len(df_merged):,}"</span>)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PASO 11 -->
+      <div class="step-card" id="step-11">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">11</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Eliminar columnas <span class="en-term">Feature Selection</span></div>
+            <div class="step-subtitle">Quita variables que no aporten al análisis</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Elimina identificadores únicos, columnas constantes, columnas con demasiados <em>missings</em> y variables irrelevantes para las hipótesis.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python · Pandas</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+            <div class="code-content"><span class="cm"># Eliminar columnas específicas</span>
+df.<span class="fn">drop</span>(columns=[<span class="st">'id'</span>, <span class="st">'timestamp_interno'</span>], inplace=<span class="kw">True</span>)
+
+<span class="cm"># Eliminar columnas con > 60% de missings</span>
+umbral = <span class="nb">0.6</span>
+cols_a_eliminar = df.columns[df.<span class="fn">isnull</span>().<span class="fn">mean</span>() <span class="op">></span> umbral]
+df.<span class="fn">drop</span>(columns=cols_a_eliminar, inplace=<span class="kw">True</span>)
+<span class="fn">print</span>(<span class="st">f"Columnas eliminadas: {list(cols_a_eliminar)}"</span>)
+
+<span class="cm"># Eliminar columnas constantes (una sola categoría)</span>
+cols_constantes = [c <span class="kw">for</span> c <span class="kw">in</span> df.columns <span class="kw">if</span> df[c].<span class="fn">nunique</span>() <span class="op">==</span> <span class="nb">1</span>]
+df.<span class="fn">drop</span>(columns=cols_constantes, inplace=<span class="kw">True</span>)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PASO 12 -->
+      <div class="step-card" id="step-12">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">12</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Formato de los datos <span class="en-term">Data Types</span></div>
+            <div class="step-subtitle">Fuerza los tipos correctos en cada columna</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Un número cargado como <em>string</em> o una fecha como <em>object</em> generará errores silenciosos en todo el análisis posterior. Corrígelo antes.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python · Pandas</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+            <div class="code-content"><span class="cm"># Convertir a numérico (coerce → NaN si no puede)</span>
+df[<span class="st">'precio'</span>] = pd.<span class="fn">to_numeric</span>(df[<span class="st">'precio'</span>], errors=<span class="st">'coerce'</span>)
+
+<span class="cm"># Convertir fechas</span>
+df[<span class="st">'fecha_compra'</span>] = pd.<span class="fn">to_datetime</span>(df[<span class="st">'fecha_compra'</span>], format=<span class="st">'%Y-%m-%d'</span>)
+
+<span class="cm"># Convertir a categórico (ahorra memoria)</span>
+df[<span class="st">'segmento'</span>] = df[<span class="st">'segmento'</span>].<span class="fn">astype</span>(<span class="st">'category'</span>)
+
+<span class="cm"># Verificar resultado</span>
+df.<span class="fn">dtypes</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PASO 13 -->
+      <div class="step-card" id="step-13">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">13</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Valores nulos <span class="en-term">Missing Values</span></div>
+            <div class="step-subtitle">Analiza e imputa los nulos con criterio</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Antes de imputar, entiende <strong>por qué</strong> hay nulos. En Data Analysis, un nulo puede ser un insight en sí mismo (ej: campo de devolución vacío = no hubo devolución).</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python · Pandas</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+            <div class="code-content"><span class="cm"># Visualizar missings</span>
+<span class="kw">import</span> missingno <span class="kw">as</span> msno
+msno.<span class="fn">matrix</span>(df)
+
+<span class="cm"># Imputar con la mediana (variables numéricas)</span>
+df[<span class="st">'edad'</span>].<span class="fn">fillna</span>(df[<span class="st">'edad'</span>].<span class="fn">median</span>(), inplace=<span class="kw">True</span>)
+
+<span class="cm"># Imputar con la moda (variables categóricas)</span>
+df[<span class="st">'ciudad'</span>].<span class="fn">fillna</span>(df[<span class="st">'ciudad'</span>].<span class="fn">mode</span>()[<span class="nb">0</span>], inplace=<span class="kw">True</span>)
+
+<span class="cm"># Eliminar filas con nulos en columnas clave</span>
+df.<span class="fn">dropna</span>(subset=[<span class="st">'target'</span>, <span class="st">'fecha_compra'</span>], inplace=<span class="kw">True</span>)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PASO 14 -->
+      <div class="step-card" id="step-14">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">14</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Valores atípicos <span class="en-term">Outliers</span></div>
+            <div class="step-subtitle">Detecta y decide qué hacer con los extremos</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">En Data Analysis los <em>outliers</em> son hallazgos, no ruido. Detéctalos, investiga su causa y decide si son errores o valores legítimos.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python · Pandas + Seaborn</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+            <div class="code-content"><span class="kw">import</span> seaborn <span class="kw">as</span> sns
+<span class="kw">import</span> matplotlib.pyplot <span class="kw">as</span> plt
+
+<span class="cm"># Método IQR</span>
+Q1 = df[<span class="st">'precio'</span>].<span class="fn">quantile</span>(<span class="nb">0.25</span>)
+Q3 = df[<span class="st">'precio'</span>].<span class="fn">quantile</span>(<span class="nb">0.75</span>)
+IQR = Q3 <span class="op">-</span> Q1
+lower = Q1 <span class="op">-</span> <span class="nb">1.5</span> <span class="op">*</span> IQR
+upper = Q3 <span class="op">+</span> <span class="nb">1.5</span> <span class="op">*</span> IQR
+
+outliers = df[(df[<span class="st">'precio'</span>] <span class="op"><</span> lower) <span class="op">|</span> (df[<span class="st">'precio'</span>] <span class="op">></span> upper)]
+<span class="fn">print</span>(<span class="st">f"Outliers detectados: {len(outliers)}"</span>)
+
+<span class="cm"># Boxplot</span>
+sns.<span class="fn">boxplot</span>(x=df[<span class="st">'precio'</span>])
+plt.<span class="fn">show</span>()</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PASO 15 -->
+      <div class="step-card" id="step-15">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">15</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Duplicados <span class="en-term">Duplicates</span></div>
+            <div class="step-subtitle">Elimina registros repetidos</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python · Pandas</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+            <div class="code-content"><span class="cm"># Verificar duplicados</span>
+n_dups = df.<span class="fn">duplicated</span>().<span class="fn">sum</span>()
+<span class="fn">print</span>(<span class="st">f"Duplicados encontrados: {n_dups}"</span>)
+
+<span class="cm"># Eliminar duplicados exactos</span>
+df.<span class="fn">drop_duplicates</span>(inplace=<span class="kw">True</span>)
+
+<span class="cm"># Duplicados por columna clave (ej: un cliente no puede aparecer 2x)</span>
+df.<span class="fn">drop_duplicates</span>(subset=[<span class="st">'id_cliente'</span>], keep=<span class="st">'last'</span>, inplace=<span class="kw">True</span>)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PASO 16 -->
+      <div class="step-card" id="step-16">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">16</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Escalado <span class="en-term">Scaling</span></div>
+            <div class="step-subtitle">Normaliza variables con escalas distintas</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Si vas a comparar o graficar variables con escalas muy distintas (ej: ingresos en €10.000 vs. edad en 0-100), normaliza con <em>MinMaxScaler</em>.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python · Scikit-learn</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+            <div class="code-content"><span class="kw">from</span> sklearn.preprocessing <span class="kw">import</span> <span class="cl">MinMaxScaler</span>
+
+scaler = <span class="cl">MinMaxScaler</span>()
+cols_numericas = [<span class="st">'ingresos'</span>, <span class="st">'edad'</span>, <span class="st">'num_compras'</span>]
+df[cols_numericas] = scaler.<span class="fn">fit_transform</span>(df[cols_numericas])
+<span class="cm"># Ahora todas las variables están entre 0 y 1</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PASO 17 -->
+      <div class="step-card" id="step-17">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">17</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Transformaciones <span class="en-term">Feature Engineering</span></div>
+            <div class="step-subtitle">Crea nuevas variables a partir de las existentes</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Extrae año, mes y día de una fecha. Crea ratios. Aplica <em>binning</em> para convertir variables continuas en categorías.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python · Pandas</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+            <div class="code-content"><span class="cm"># Extraer componentes de fecha</span>
+df[<span class="st">'anyo'</span>]    = df[<span class="st">'fecha_compra'</span>].dt.year
+df[<span class="st">'mes'</span>]     = df[<span class="st">'fecha_compra'</span>].dt.month
+df[<span class="st">'dia_semana'</span>] = df[<span class="st">'fecha_compra'</span>].dt.day_name()
+
+<span class="cm"># Ratio numérico</span>
+df[<span class="st">'ticket_medio'</span>] = df[<span class="st">'ingresos'</span>] <span class="op">/</span> df[<span class="st">'num_compras'</span>]
+
+<span class="cm"># Binning — convertir edad continua en tramos</span>
+df[<span class="st">'tramo_edad'</span>] = pd.<span class="fn">cut</span>(
+    df[<span class="st">'edad'</span>],
+    bins=[<span class="nb">0</span>, <span class="nb">25</span>, <span class="nb">35</span>, <span class="nb">50</span>, <span class="nb">65</span>, <span class="nb">100</span>],
+    labels=[<span class="st">'18-25'</span>, <span class="st">'26-35'</span>, <span class="st">'36-50'</span>, <span class="st">'51-65'</span>, <span class="st">'65+'</span>]
+)</div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /phase3 -->
+
+    <div class="phase-divider"></div>
+
+    <!-- ── FASE 4 ── -->
+    <div class="phase-block" id="phase4">
+      <div class="phase-header">
+        <span class="phase-badge ph4">Fase 04</span>
+        <h2 class="phase-title">Analysis</h2>
+      </div>
+
+      <!-- PASO 18 -->
+      <div class="step-card" id="step-18">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">18</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Análisis univariante <span class="en-term">Univariate Analysis</span></div>
+            <div class="step-subtitle">Entiende cada variable por separado</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Analiza la distribución, centralidad y dispersión de cada variable. Usa histogramas y boxplots para las numéricas, y gráficos de barras para las categóricas.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python · Pandas + Matplotlib</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+            <div class="code-content"><span class="cm"># Estadísticos de centralidad y dispersión</span>
+stats = df[<span class="st">'precio'</span>].<span class="fn">agg</span>([<span class="st">'mean'</span>, <span class="st">'median'</span>, <span class="st">'std'</span>, <span class="st">'min'</span>, <span class="st">'max'</span>])
+<span class="fn">print</span>(stats)
+
+<span class="cm"># Histograma + KDE</span>
+<span class="kw">import</span> matplotlib.pyplot <span class="kw">as</span> plt
+fig, axes = plt.<span class="fn">subplots</span>(<span class="nb">1</span>, <span class="nb">2</span>, figsize=(<span class="nb">12</span>, <span class="nb">4</span>))
+df[<span class="st">'precio'</span>].<span class="fn">hist</span>(bins=<span class="nb">30</span>, ax=axes[<span class="nb">0</span>])
+sns.<span class="fn">boxplot</span>(x=df[<span class="st">'precio'</span>], ax=axes[<span class="nb">1</span>])
+plt.<span class="fn">show</span>()
+
+<span class="cm"># Variable categórica</span>
+df[<span class="st">'segmento'</span>].<span class="fn">value_counts</span>().<span class="fn">plot</span>(kind=<span class="st">'bar'</span>)
+plt.<span class="fn">show</span>()</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PASO 19 -->
+      <div class="step-card" id="step-19">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">19</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Análisis bivariante <span class="en-term">Bivariate Analysis</span></div>
+            <div class="step-subtitle">Descubre relaciones entre pares de variables</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Cruza dos variables para descubrir patrones. Agrupa por categóricas y calcula estadísticos. Usa <em>scatter plots</em> para relaciones numéricas.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python · Pandas + Seaborn</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+            <div class="code-content"><span class="cm"># Agrupado: media de precio por segmento</span>
+df.<span class="fn">groupby</span>(<span class="st">'segmento'</span>)[<span class="st">'precio'</span>].<span class="fn">agg</span>([<span class="st">'mean'</span>, <span class="st">'count'</span>, <span class="st">'std'</span>])
+
+<span class="cm"># Scatter plot dos variables numéricas</span>
+sns.<span class="fn">scatterplot</span>(data=df, x=<span class="st">'edad'</span>, y=<span class="st">'precio'</span>, hue=<span class="st">'segmento'</span>, alpha=<span class="nb">0.6</span>)
+
+<span class="cm"># Boxplot agrupado (numérico vs categórico)</span>
+sns.<span class="fn">boxplot</span>(data=df, x=<span class="st">'segmento'</span>, y=<span class="st">'precio'</span>)
+
+<span class="cm"># Cross table (dos categóricas)</span>
+pd.<span class="fn">crosstab</span>(df[<span class="st">'segmento'</span>], df[<span class="st">'tramo_edad'</span>], normalize=<span class="st">'index'</span>)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PASO 20 -->
+      <div class="step-card" id="step-20">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">20</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Análisis multivariante <span class="en-term">Multivariate Analysis</span></div>
+            <div class="step-subtitle">Correlación y patrones entre todas las variables</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">El <em>heatmap</em> de correlación y el <em>pairplot</em> son tus herramientas clave para ver de un vistazo las relaciones entre todas las variables numéricas.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python · Seaborn</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+            <div class="code-content"><span class="cm"># Heatmap de correlación</span>
+plt.<span class="fn">figure</span>(figsize=(<span class="nb">12</span>, <span class="nb">8</span>))
+corr_matrix = df.<span class="fn">select_dtypes</span>(include=<span class="st">'number'</span>).<span class="fn">corr</span>()
+sns.<span class="fn">heatmap</span>(
+    corr_matrix,
+    annot=<span class="kw">True</span>, fmt=<span class="st">'.2f'</span>,
+    cmap=<span class="st">'coolwarm'</span>, center=<span class="nb">0</span>,
+    square=<span class="kw">True</span>
+)
+plt.<span class="fn">show</span>()
+
+<span class="cm"># Pairplot — relación de todas con todas</span>
+sns.<span class="fn">pairplot</span>(df, hue=<span class="st">'segmento'</span>, diag_kind=<span class="st">'kde'</span>, plot_kws={<span class="st">'alpha'</span>: <span class="nb">0.4</span>})
+plt.<span class="fn">show</span>()</div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /phase4 -->
+
+    <div class="phase-divider"></div>
+
+    <!-- ── FASE 5 ── -->
+    <div class="phase-block" id="phase5">
+      <div class="phase-header">
+        <span class="phase-badge ph5">Fase 05</span>
+        <h2 class="phase-title">Resultados</h2>
+      </div>
+
+      <!-- PASO 21 -->
+      <div class="step-card" id="step-21">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">21</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Contraste con hipótesis</div>
+            <div class="step-subtitle">¿Los datos confirman o refutan tus hipótesis?</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Vuelve a tus hipótesis iniciales y respóndelas una a una con evidencia de los datos. Sé honesto: si el análisis no responde la pregunta de negocio, toca iterar.</p>
+          <ul class="checklist">
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>H1 confirmada / refutada con evidencia</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>H2 confirmada / refutada con evidencia</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>H3 confirmada / refutada con evidencia</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Insights inesperados documentados</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- PASO 22 -->
+      <div class="step-card" id="step-22">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">22</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Plan de acción</div>
+            <div class="step-subtitle">¿Qué se hace con los resultados?</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Traduce cada hallazgo en una acción concreta. Un análisis sin plan de acción es un gasto de tiempo, no una inversión.</p>
+          <ul class="checklist">
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Acciones priorizadas por impacto</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Responsables asignados</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Timeline definido</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- PASO 23 -->
+      <div class="step-card" id="step-23">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">23</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Productivización <span class="en-term">Productionization</span></div>
+            <div class="step-subtitle">¿El análisis necesita vivir en un dashboard?</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Si el análisis debe ser consultable de forma recurrente por otros equipos, plantéate productivizarlo en Tableau, Power BI, Looker o un dashboard en Python (Streamlit, Dash).</p>
+          <ul class="checklist">
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Necesidad de dashboard evaluada</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Herramienta de BI seleccionada</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- PASO 24 -->
+      <div class="step-card" id="step-24">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">24</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Comunicación de resultados <span class="en-term">Storytelling</span></div>
+            <div class="step-subtitle">Presenta con hilo conductor claro</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Una buena presentación sigue la estructura: <strong>problema → datos → proceso → hallazgos → acciones</strong>. Tu audiencia no entiende de datos, adapta el lenguaje.</p>
+          <div class="tip-box"><strong>💡 Regla de oro:</strong> si no puedes explicar tu hallazgo en dos frases al CEO, no lo entiendes tú tampoco. Simplifica.</div>
+          <ul class="checklist">
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Presentación con estructura narrativa</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Gráficas limpias y sin ruido visual</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Conclusiones en lenguaje de negocio</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- PASO 25 -->
+      <div class="step-card" id="step-25">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">25</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Transmitir conocimiento <span class="en-term">Knowledge Sharing</span></div>
+            <div class="step-subtitle">Documenta y comparte lo aprendido</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Documenta los insights, las decisiones técnicas tomadas y las lecciones aprendidas. Un README bien escrito o una charla interna multiplica el valor del análisis.</p>
+          <ul class="checklist">
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>README del proyecto completo</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Código comentado y reproducible</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Insights compartidos con el equipo</span></li>
+          </ul>
+        </div>
+      </div>
+
+    </div><!-- /phase5 -->
+
+  </div><!-- /content-area -->
+</main>
+
+<script>
+  const TOTAL = 25;
+  let checked = 0;
+
+  function toggleStep(header) {
+    const card = header.parentElement;
+    card.classList.toggle('open');
+  }
+
+  function toggleCheck(li) {
+    li.classList.toggle('checked');
+    updateProgress();
+  }
+
+  function updateProgress() {
+    const allChecks = document.querySelectorAll('.checklist li');
+    checked = document.querySelectorAll('.checklist li.checked').length;
+    const pct = Math.round((checked / allChecks.length) * 100);
+    document.getElementById('progressBar').style.width = pct + '%';
+    document.getElementById('progressCount').textContent = checked + ' / ' + allChecks.length + ' checks';
+  }
+
+  function scrollTo(id) {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function copyCode(btn) {
+    const pre = btn.closest('.code-block').querySelector('.code-content');
+    const text = pre.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = '¡Copiado!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'Copiar';
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  }
+
+  // Highlight active section on scroll
+  const mainEl = document.getElementById('main');
+  const navItems = document.querySelectorAll('.nav-item');
+  const phases = ['phase1','phase2','phase3','phase4','phase5'];
+
+  mainEl.addEventListener('scroll', () => {
+    let current = 0;
+    phases.forEach((id, i) => {
+      const el = document.getElementById(id);
+      if (el && el.getBoundingClientRect().top < 200) current = i;
+    });
+    navItems.forEach((item, i) => {
+      item.classList.toggle('active', i === current);
+    });
+  });
+</script>
+</body>
+</html>

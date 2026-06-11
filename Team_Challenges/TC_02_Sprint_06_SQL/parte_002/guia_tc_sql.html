@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guía TC SQL — Tu_empresa Database</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@400;500;600;700&display=swap');
+        
+        :root {
+            --teal: #38908F;
+            --mint: #B2EBE0;
+            --sky: #5E96AE;
+            --peach-light: #FFBFA3;
+            --coral: #E08963;
+            --cream: #FFF9F5;
+            --white: #FFFFFF;
+            --text-dark: #2C4A52;
+            --text-medium: #5A7B85;
+            --text-light: #8BA5AE;
+            --shadow: rgba(56, 144, 143, 0.15);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--cream);
+            color: var(--text-dark);
+            line-height: 1.75;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--mint) 0%, var(--sky) 100%);
+            padding: 4rem 2rem;
+            text-align: center;
+            border-bottom: 4px solid var(--teal);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: '';
+            position: absolute;
+            top: -100px;
+            right: -100px;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255, 191, 163, 0.3) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: -120px;
+            left: -120px;
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, rgba(56, 144, 143, 0.25) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        
+        h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--white);
+            margin-bottom: 0.75rem;
+            position: relative;
+            z-index: 1;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .subtitle {
+            color: var(--white);
+            font-size: 1.25rem;
+            position: relative;
+            z-index: 1;
+            font-weight: 500;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        
+        nav {
+            background: var(--white);
+            padding: 1.5rem 2rem;
+            border-bottom: 3px solid var(--mint);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+        
+        nav ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 3rem;
+            justify-content: center;
+        }
+        
+        nav a {
+            color: var(--text-medium);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            padding: 0.5rem 0;
+            font-size: 1.05rem;
+        }
+        
+        nav a:hover {
+            color: var(--teal);
+        }
+        
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--teal), var(--sky));
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+        
+        nav a:hover::after {
+            width: 100%;
+        }
+        
+        section {
+            margin: 3rem 0;
+            padding: 2.5rem;
+            background: var(--white);
+            border-radius: 16px;
+            border: 3px solid var(--mint);
+            box-shadow: 0 8px 24px var(--shadow);
+        }
+        
+        h2 {
+            font-size: 2.4rem;
+            margin-bottom: 2rem;
+            color: var(--teal);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-weight: 700;
+        }
+        
+        h2::before {
+            content: '';
+            width: 8px;
+            height: 2.5rem;
+            background: linear-gradient(to bottom, var(--teal), var(--sky));
+            border-radius: 4px;
+        }
+        
+        h3 {
+            font-size: 1.75rem;
+            margin: 2.5rem 0 1.25rem;
+            color: var(--sky);
+            font-weight: 700;
+        }
+        
+        h4 {
+            font-size: 1.35rem;
+            margin: 2rem 0 1rem;
+            color: var(--teal);
+            font-weight: 600;
+        }
+        
+        p {
+            margin-bottom: 1.25rem;
+            color: var(--text-medium);
+        }
+        
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            background: linear-gradient(135deg, #E8F8F7 0%, #F0F9F8 100%);
+            padding: 0.3rem 0.7rem;
+            border-radius: 6px;
+            font-size: 0.9em;
+            color: var(--teal);
+            border: 2px solid var(--mint);
+        }
+        
+        pre {
+            background: linear-gradient(135deg, #F8FFFE 0%, #F0F9F8 100%);
+            padding: 1.75rem;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 1.75rem 0;
+            border: 2px solid var(--mint);
+            position: relative;
+        }
+        
+        pre code {
+            background: none;
+            padding: 0;
+            border: none;
+            color: var(--text-dark);
+            font-size: 0.95rem;
+            line-height: 1.8;
+        }
+        
+        .cmd-block {
+            background: linear-gradient(135deg, var(--peach-light) 0%, #FFE8DC 100%);
+            padding: 1.75rem;
+            border-radius: 12px;
+            margin: 1.75rem 0;
+            border-left: 5px solid var(--coral);
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-dark);
+            box-shadow: 0 4px 12px rgba(224, 137, 99, 0.15);
+        }
+        
+        .cmd-block::before {
+            content: '$ ';
+            color: var(--teal);
+            font-weight: 700;
+        }
+        
+        .warning {
+            background: linear-gradient(135deg, #FFF4ED 0%, #FFEEE3 100%);
+            border-left: 5px solid var(--coral);
+            padding: 1.5rem 2rem;
+            margin: 2rem 0;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(224, 137, 99, 0.12);
+        }
+        
+        .warning::before {
+            content: '⚠️ IMPORTANTE';
+            display: block;
+            font-weight: 700;
+            color: var(--coral);
+            margin-bottom: 0.75rem;
+            font-size: 1rem;
+        }
+        
+        .tip {
+            background: linear-gradient(135deg, #E8FCFA 0%, #D4F5F0 100%);
+            border-left: 5px solid var(--teal);
+            padding: 1.5rem 2rem;
+            margin: 2rem 0;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(56, 144, 143, 0.12);
+        }
+        
+        .tip::before {
+            content: '💡 Consejo';
+            display: block;
+            font-weight: 700;
+            color: var(--teal);
+            margin-bottom: 0.75rem;
+            font-size: 1rem;
+        }
+        
+        .success {
+            background: linear-gradient(135deg, #E8FCF4 0%, #D4F5E8 100%);
+            border-left: 5px solid #10b981;
+            padding: 1.5rem 2rem;
+            margin: 2rem 0;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.12);
+        }
+        
+        .success::before {
+            content: '✅ Buenas noticias';
+            display: block;
+            font-weight: 700;
+            color: #10b981;
+            margin-bottom: 0.75rem;
+            font-size: 1rem;
+        }
+        
+        ul, ol {
+            margin: 1.25rem 0 1.25rem 2rem;
+            color: var(--text-medium);
+        }
+        
+        li {
+            margin: 0.75rem 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            background: var(--white);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 16px var(--shadow);
+            border: 2px solid var(--mint);
+        }
+        
+        th {
+            background: linear-gradient(135deg, var(--teal), var(--sky));
+            color: white;
+            padding: 1.25rem;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        td {
+            padding: 1.25rem;
+            border-top: 2px solid var(--mint);
+            color: var(--text-medium);
+        }
+        
+        tr:hover {
+            background: linear-gradient(135deg, #F8FFFE 0%, #F0F9F8 100%);
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.75rem;
+            margin: 2rem 0;
+        }
+        
+        /* Layout horizontal para referencia rápida */
+        .horizontal-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        
+        .card {
+            background: linear-gradient(135deg, var(--white) 0%, #FAFFFE 100%);
+            padding: 2rem;
+            border-radius: 16px;
+            border: 3px solid var(--mint);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+        
+        .card:hover {
+            transform: translateY(-6px);
+            border-color: var(--teal);
+            box-shadow: 0 12px 32px rgba(56, 144, 143, 0.2);
+        }
+        
+        .card h4 {
+            color: var(--sky);
+            margin-top: 0;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--text-light);
+            border-top: 3px solid var(--mint);
+            margin-top: 4rem;
+            background: var(--white);
+        }
+        
+        footer p {
+            color: var(--text-light);
+        }
+        
+        strong {
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.25rem;
+            }
+            
+            nav ul {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: center;
+            }
+            
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            section {
+                padding: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Team Challenge SQL</h1>
+        <p class="subtitle">Guía completa de BigQuery, Entornos Virtuales y Git Flow</p>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="#bigquery">BigQuery</a></li>
+            <li><a href="#venv">Entornos Virtuales</a></li>
+            <li><a href="#git">Git Flow</a></li>
+            <li><a href="#costes">Gestión de Costes</a></li>
+            <li><a href="#quick-ref">Referencia Rápida</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <!-- ==================== SECCIÓN 1: BIGQUERY ==================== -->
+        <section id="bigquery">
+            <h2>Manual de Google BigQuery</h2>
+            
+            <h3>¿Qué es BigQuery?</h3>
+            <p>
+                <strong>Google BigQuery</strong> es un almacén de datos (data warehouse) serverless y escalable de Google Cloud Platform. 
+                Es perfecto para análisis de grandes volúmenes de datos mediante SQL estándar.
+            </p>
+            
+            <div class="card">
+                <h4>Características principales</h4>
+                <ul>
+                    <li><strong>Serverless:</strong> no necesitas gestionar servidores</li>
+                    <li><strong>Escalable:</strong> soporta desde GB hasta petabytes de datos</li>
+                    <li><strong>SQL estándar:</strong> usa sintaxis SQL ANSI compatible con la mayoría de bases de datos</li>
+                    <li><strong>Rápido:</strong> queries distribuidas que procesan datos en paralelo</li>
+                </ul>
+            </div>
+            
+            <h3>Conceptos básicos</h3>
+            
+            <h4>Estructura jerárquica</h4>
+            <pre><code>Proyecto GCP
+ └── Dataset
+      └── Tabla
+           └── Campos (columnas)</code></pre>
+           
+            <ul>
+                <li><strong>Proyecto:</strong> tu contenedor de GCP (ej: <code>mi-proyecto-bootcamp</code>)</li>
+                <li><strong>Dataset:</strong> agrupación lógica de tablas (ej: <code>Tu_empresa</code>)</li>
+                <li><strong>Tabla:</strong> estructura de datos con filas y columnas (ej: <code>customers</code>)</li>
+            </ul>
+            
+            <h3>Tipos de dato en BigQuery</h3>
+            
+            <table>
+                <tr>
+                    <th>Tipo BigQuery</th>
+                    <th>Equivalente Python</th>
+                    <th>Ejemplo</th>
+                </tr>
+                <tr>
+                    <td><code>STRING</code></td>
+                    <td>str</td>
+                    <td>'Madrid', 'usuario@email.com'</td>
+                </tr>
+                <tr>
+                    <td><code>INT64</code></td>
+                    <td>int</td>
+                    <td>42, 1000, -5</td>
+                </tr>
+                <tr>
+                    <td><code>FLOAT64</code></td>
+                    <td>float</td>
+                    <td>99.99, -3.14, 1.5</td>
+                </tr>
+                <tr>
+                    <td><code>BOOL</code></td>
+                    <td>bool</td>
+                    <td>TRUE, FALSE</td>
+                </tr>
+                <tr>
+                    <td><code>DATE</code></td>
+                    <td>datetime.date</td>
+                    <td>'2024-12-31'</td>
+                </tr>
+                <tr>
+                    <td><code>TIMESTAMP</code></td>
+                    <td>datetime.datetime</td>
+                    <td>'2024-12-31 14:30:00 UTC'</td>
+                </tr>
+            </table>
+            
+            <div class="warning">
+                En BigQuery NO existen <code>VARCHAR</code> ni <code>INT</code>. Usa siempre <code>STRING</code> e <code>INT64</code>.
+            </div>
+            
+            <h3>Configurar credenciales</h3>
+            
+            <h4>1. Crear Service Account en GCP</h4>
+            <ol>
+                <li>Ir a <strong>IAM & Admin</strong> → <strong>Service Accounts</strong></li>
+                <li>Clic en <strong>Create Service Account</strong></li>
+                <li>Nombre: <code>bigquery-admin</code></li>
+                <li>Asignar rol: <strong>BigQuery Admin</strong></li>
+                <li>Crear una clave JSON y descargarla</li>
+            </ol>
+            
+            <h4>2. Configurar variables de entorno</h4>
+            <p>Crear un fichero <code>.env</code> en la raíz del proyecto:</p>
+            
+            <pre><code>GCP_PROJECT_ID=tu-proyecto-gcp
+BQ_DATASET_ID=Tu_empresa
+GOOGLE_APPLICATION_CREDENTIALS=./credentials/service-account.json</code></pre>
+            
+            <div class="warning">
+                El fichero <code>.env</code> NUNCA se sube a Git. Debe estar en <code>.gitignore</code>.
+            </div>
+            
+            <h3>Crear dataset y tablas con Python</h3>
+            
+            <h4>Instalación de librerías</h4>
+            <div class="cmd-block">pip install google-cloud-bigquery google-auth python-dotenv</div>
+            
+            <h4>Código para crear el dataset</h4>
+            <pre><code>from google.cloud import bigquery
+from google.oauth2 import service_account
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# Configuración
+PROJECT_ID = os.getenv("GCP_PROJECT_ID")
+DATASET_ID = os.getenv("BQ_DATASET_ID")
+CREDENTIALS_PATH = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+
+# Cliente autenticado
+credentials = service_account.Credentials.from_service_account_file(
+    CREDENTIALS_PATH
+)
+client = bigquery.Client(
+    project=PROJECT_ID,
+    credentials=credentials
+)
+
+# Crear dataset
+dataset_ref = bigquery.Dataset(f"{PROJECT_ID}.{DATASET_ID}")
+dataset_ref.location = "EU"  # Datos en Europa
+dataset = client.create_dataset(dataset_ref, exists_ok=True)
+print(f"Dataset {DATASET_ID} creado")</code></pre>
+            
+            <h4>Código para crear una tabla</h4>
+            <pre><code>schema = [
+    bigquery.SchemaField("customer_id", "INT64", mode="REQUIRED"),
+    bigquery.SchemaField("first_name", "STRING", mode="REQUIRED"),
+    bigquery.SchemaField("last_name", "STRING", mode="REQUIRED"),
+    bigquery.SchemaField("email", "STRING", mode="REQUIRED"),
+    bigquery.SchemaField("country", "STRING", mode="NULLABLE"),
+    bigquery.SchemaField("registration_date", "DATE", mode="REQUIRED"),
+]
+
+table_ref = f"{PROJECT_ID}.{DATASET_ID}.customers"
+table = bigquery.Table(table_ref, schema=schema)
+table = client.create_table(table, exists_ok=True)
+print(f"Tabla customers creada")</code></pre>
+            
+            <h3>Cargar datos desde pandas</h3>
+            
+            <pre><code>import pandas as pd
+
+# Crear DataFrame de ejemplo
+df = pd.DataFrame({
+    'customer_id': [1, 2, 3],
+    'first_name': ['Ana', 'Carlos', 'María'],
+    'last_name': ['García', 'López', 'Fernández'],
+    'email': ['ana@email.com', 'carlos@email.com', 'maria@email.com'],
+    'country': ['Spain', 'Spain', 'Mexico'],
+    'registration_date': pd.to_datetime(['2024-01-15', '2024-02-20', '2024-03-10']).date
+})
+
+# Configurar la carga
+job_config = bigquery.LoadJobConfig(
+    write_disposition="WRITE_TRUNCATE",  # Sobreescribe
+    schema=schema
+)
+
+# Cargar datos
+table_ref = f"{PROJECT_ID}.{DATASET_ID}.customers"
+job = client.load_table_from_dataframe(df, table_ref, job_config=job_config)
+job.result()  # Esperar a que termine
+print(f"{len(df)} filas cargadas")</code></pre>
+            
+            <h3>Ejecutar queries</h3>
+            
+            <h4>Query básica</h4>
+            <pre><code>query = f"""
+    SELECT 
+        country,
+        COUNT(*) as total_customers
+    FROM `{PROJECT_ID}.{DATASET_ID}.customers`
+    GROUP BY country
+    ORDER BY total_customers DESC
+"""
+
+# Ejecutar y obtener resultados
+df_result = client.query(query).to_dataframe()
+print(df_result)</code></pre>
+            
+            <h4>Query con JOINs</h4>
+            <pre><code>query = f"""
+    SELECT 
+        c.first_name,
+        c.last_name,
+        COUNT(o.order_id) as total_orders,
+        SUM(p.amount) as total_spent
+    FROM `{PROJECT_ID}.{DATASET_ID}.customers` c
+    LEFT JOIN `{PROJECT_ID}.{DATASET_ID}.orders` o 
+        ON c.customer_id = o.customer_id
+    LEFT JOIN `{PROJECT_ID}.{DATASET_ID}.payments` p 
+        ON o.order_id = p.order_id
+    WHERE p.status = 'completed'
+    GROUP BY c.first_name, c.last_name
+    ORDER BY total_spent DESC
+    LIMIT 10
+"""
+
+top_customers = client.query(query).to_dataframe()
+print(top_customers)</code></pre>
+            
+            <div class="tip">
+                BigQuery usa backticks ` en lugar de comillas para los nombres de tablas con puntos:
+                <code>`proyecto.dataset.tabla`</code>
+            </div>
+            
+            <h3>Funciones útiles de BigQuery</h3>
+            
+            <table>
+                <tr>
+                    <th>Función</th>
+                    <th>Descripción</th>
+                    <th>Ejemplo</th>
+                </tr>
+                <tr>
+                    <td><code>FORMAT_DATE()</code></td>
+                    <td>Formatear fecha</td>
+                    <td><code>FORMAT_DATE('%Y-%m', order_date)</code></td>
+                </tr>
+                <tr>
+                    <td><code>DATE_DIFF()</code></td>
+                    <td>Diferencia entre fechas</td>
+                    <td><code>DATE_DIFF(delivered_date, order_date, DAY)</code></td>
+                </tr>
+                <tr>
+                    <td><code>COUNTIF()</code></td>
+                    <td>Contar con condición</td>
+                    <td><code>COUNTIF(status = 'completed')</code></td>
+                </tr>
+                <tr>
+                    <td><code>ROUND()</code></td>
+                    <td>Redondear número</td>
+                    <td><code>ROUND(price, 2)</code></td>
+                </tr>
+                <tr>
+                    <td><code>CONCAT()</code></td>
+                    <td>Concatenar strings</td>
+                    <td><code>CONCAT(first_name, ' ', last_name)</code></td>
+                </tr>
+            </table>
+        </section>
+
+        <!-- ==================== SECCIÓN 2: ENTORNOS VIRTUALES ==================== -->
+        <section id="venv">
+            <h2>Manual de Entornos Virtuales (venv)</h2>
+            
+            <h3>¿Qué es un entorno virtual?</h3>
+            <p>
+                Un <strong>entorno virtual</strong> es un directorio aislado que contiene una instalación independiente de Python 
+                y sus librerías. Te permite tener diferentes versiones de paquetes para diferentes proyectos sin conflictos.
+            </p>
+            
+            <h4>¿Por qué usar entornos virtuales?</h4>
+            <ul>
+                <li><strong>Aislamiento:</strong> cada proyecto tiene sus propias dependencias</li>
+                <li><strong>Reproducibilidad:</strong> cualquiera puede recrear el entorno exacto</li>
+                <li><strong>Sin conflictos:</strong> evitas problemas de versiones incompatibles</li>
+                <li><strong>Limpieza:</strong> no "contaminas" la instalación global de Python</li>
+            </ul>
+            
+            <div class="warning">
+                Nunca trabajes directamente con la instalación global de Python para proyectos. Siempre usa entornos virtuales.
+            </div>
+            
+            <h3>Crear un entorno virtual</h3>
+            
+            <h4>Desde la terminal, en la raíz del proyecto:</h4>
+            
+            <div class="cmd-block">python -m venv venv</div>
+            
+            <p>Esto crea una carpeta <code>venv/</code> con todo lo necesario.</p>
+            
+            <div class="tip">
+                El primer "venv" es el módulo de Python. El segundo es el nombre de la carpeta (puedes usar otro nombre, pero "venv" es convención).
+            </div>
+            
+            <h3>Activar el entorno virtual</h3>
+            
+            <h4>En Mac/Linux:</h4>
+            <div class="cmd-block">source venv/bin/activate</div>
+            
+            <h4>En Windows (cmd):</h4>
+            <div class="cmd-block">venv\Scripts\activate</div>
+            
+            <h4>En Windows (PowerShell):</h4>
+            <div class="cmd-block">venv\Scripts\Activate.ps1</div>
+            
+            <p>Cuando esté activado, verás <code>(venv)</code> al principio de la línea de comandos:</p>
+            <pre><code>(venv) usuario@pc:~/proyecto$</code></pre>
+            
+            <h3>Instalar paquetes</h3>
+            
+            <h4>Instalar un paquete individual:</h4>
+            <div class="cmd-block">pip install pandas</div>
+            
+            <h4>Instalar todas las dependencias del proyecto:</h4>
+            <div class="cmd-block">pip install -r requirements.txt</div>
+            
+            <h4>Ver paquetes instalados:</h4>
+            <div class="cmd-block">pip list</div>
+            
+            <h3>Gestionar requirements.txt</h3>
+            
+            <p>El fichero <code>requirements.txt</code> lista todas las dependencias del proyecto con sus versiones exactas.</p>
+            
+            <h4>Generar requirements.txt:</h4>
+            <div class="cmd-block">pip freeze > requirements.txt</div>
+            
+            <p>Ejemplo de <code>requirements.txt</code>:</p>
+            <pre><code>google-cloud-bigquery==3.17.2
+pandas==2.2.1
+faker==24.2.0
+python-dotenv==1.0.1</code></pre>
+            
+            <div class="warning">
+                Ejecuta <code>pip freeze > requirements.txt</code> cada vez que instales un paquete nuevo. Así tus compañeros podrán sincronizar las dependencias.
+            </div>
+            
+            <h3>Desactivar el entorno virtual</h3>
+            
+            <div class="cmd-block">deactivate</div>
+            
+            <p>Esto te devuelve al entorno global de Python.</p>
+            
+            <h3>Workflow completo con venv</h3>
+            
+            <div class="card">
+                <h4>Setup inicial (primera vez)</h4>
+                <pre><code># 1. Crear el entorno virtual
+python -m venv venv
+
+# 2. Activarlo
+source venv/bin/activate  # Mac/Linux
+venv\Scripts\activate     # Windows
+
+# 3. Instalar dependencias
+pip install -r requirements.txt
+
+# 4. Verificar
+pip list</code></pre>
+            </div>
+            
+            <div class="card">
+                <h4>Trabajo diario</h4>
+                <pre><code># Al empezar a trabajar
+source venv/bin/activate
+
+# ... trabajar en el proyecto ...
+
+# Si instalas un paquete nuevo
+pip install nueva-libreria
+pip freeze > requirements.txt
+
+# Al terminar (opcional)
+deactivate</code></pre>
+            </div>
+            
+            <div class="card">
+                <h4>Sincronizar con el equipo</h4>
+                <pre><code># Cuando un compañero añade dependencias nuevas
+git pull origin main
+pip install -r requirements.txt</code></pre>
+            </div>
+            
+            <h3>.gitignore y entornos virtuales</h3>
+            
+            <p>La carpeta <code>venv/</code> NUNCA se sube a Git porque:</p>
+            <ul>
+                <li>Pesa mucho (cientos de MB)</li>
+                <li>Es específica de cada máquina</li>
+                <li>Se puede recrear fácilmente desde <code>requirements.txt</code></li>
+            </ul>
+            
+            <p>Asegúrate de que tu <code>.gitignore</code> contiene:</p>
+            <pre><code>venv/
+.venv/
+env/
+.env</code></pre>
+            
+            <div class="tip">
+                Si accidentalmente subiste <code>venv/</code> a Git, puedes eliminarlo del historial con:
+                <pre><code>git rm -r --cached venv/
+git commit -m "remove venv from tracking"</code></pre>
+            </div>
+        </section>
+
+        <!-- ==================== SECCIÓN 3: GIT FLOW ==================== -->
+        <section id="git">
+            <h2>Manual de Git Flow Simplificado</h2>
+            
+            <h3>¿Qué es Git Flow?</h3>
+            <p>
+                <strong>Git Flow</strong> es una metodología de trabajo con Git que define cómo organizar las ramas y coordinar el trabajo en equipo.
+            </p>
+            
+            <p>
+                Para este proyecto usamos una <strong>versión simplificada</strong>: solo trabajamos con <code>main</code> y ramas de feature. 
+                No usamos ramas <code>develop</code>, <code>release</code> ni <code>hotfix</code>.
+            </p>
+            
+            <h3>Estructura de ramas</h3>
+            
+            <div class="grid">
+                <div class="card">
+                    <h4>main</h4>
+                    <p>Rama principal y protegida. Contiene solo código revisado y estable.</p>
+                    <ul>
+                        <li>Nunca se hace commit directo a main</li>
+                        <li>Solo se integran cambios vía Pull Request</li>
+                        <li>Requiere aprobación de otro integrante</li>
+                    </ul>
+                </div>
+                
+                <div class="card">
+                    <h4>feature/nombre-funcionalidad</h4>
+                    <p>Ramas temporales para desarrollar funcionalidades.</p>
+                    <ul>
+                        <li>Se crean desde main</li>
+                        <li>Cada integrante trabaja en su propia rama</li>
+                        <li>Se eliminan tras hacer merge</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <h3>Setup inicial del repositorio</h3>
+            
+            <h4>1. Una persona crea el repositorio en GitHub</h4>
+            <ol>
+                <li>New repository → nombre: <code>tc-sql-Tu_empresa</code></li>
+                <li>Inicializar con README</li>
+                <li>Settings → Collaborators → Add people (añadir al equipo)</li>
+            </ol>
+            
+            <h4>2. Proteger la rama main</h4>
+            <ol>
+                <li>Settings → Branches → Add rule</li>
+                <li>Branch name pattern: <code>main</code></li>
+                <li>Marcar:
+                    <ul>
+                        <li>✅ Require a pull request before merging</li>
+                        <li>✅ Require approvals: 1</li>
+                        <li>✅ Dismiss stale pull request approvals when new commits are pushed</li>
+                    </ul>
+                </li>
+                <li>Save changes</li>
+            </ol>
+            
+            <div class="warning">
+                Proteger <code>main</code> desde el principio evita commits accidentales y fuerza el flujo de PR.
+            </div>
+            
+            <h4>3. Todos clonan el repositorio</h4>
+            <div class="cmd-block">git clone https://github.com/usuario/tc-sql-Tu_empresa.git
+cd tc-sql-Tu_empresa</div>
+            
+            <h3>Workflow de desarrollo</h3>
+            
+            <h4>PASO 1: Crear una rama de feature</h4>
+            
+            <pre><code># Asegurarse de estar en main y actualizado
+git checkout main
+git pull origin main
+
+# Crear nueva rama de feature
+git checkout -b feature/bigquery-setup-ana
+
+# Verificar en qué rama estás
+git branch</code></pre>
+            
+            <div class="tip">
+                Convención de nombres: <code>feature/descripcion-nombre</code>
+                <br>Ejemplos:
+                <ul>
+                    <li><code>feature/er-diagram-carlos</code></li>
+                    <li><code>feature/data-generation-maria</code></li>
+                    <li><code>feature/queries-validation-pablo</code></li>
+                </ul>
+            </div>
+            
+            <h4>PASO 2: Hacer commits</h4>
+            
+            <pre><code># Ver cambios
+git status
+
+# Añadir ficheros
+git add notebooks/01_setup_bigquery.ipynb
+git add requirements.txt
+
+# O añadir todos los cambios
+git add .
+
+# Hacer commit con mensaje descriptivo
+git commit -m "feat: crear dataset y tabla customers en BigQuery"</code></pre>
+            
+            <h4>Formato de commits: Conventional Commits</h4>
+            
+            <table>
+                <tr>
+                    <th>Tipo</th>
+                    <th>Cuándo usarlo</th>
+                    <th>Ejemplo</th>
+                </tr>
+                <tr>
+                    <td><code>feat:</code></td>
+                    <td>Nueva funcionalidad</td>
+                    <td><code>feat: añadir generación de datos de products</code></td>
+                </tr>
+                <tr>
+                    <td><code>fix:</code></td>
+                    <td>Corrección de bug</td>
+                    <td><code>fix: corregir FK de order_items a orders</code></td>
+                </tr>
+                <tr>
+                    <td><code>docs:</code></td>
+                    <td>Documentación</td>
+                    <td><code>docs: añadir justificación de 3NF</code></td>
+                </tr>
+                <tr>
+                    <td><code>refactor:</code></td>
+                    <td>Refactorización</td>
+                    <td><code>refactor: extraer generación de fechas a función</code></td>
+                </tr>
+                <tr>
+                    <td><code>style:</code></td>
+                    <td>Formato código</td>
+                    <td><code>style: formatear queries con black</code></td>
+                </tr>
+            </table>
+            
+            <h4>PASO 3: Subir la rama al repositorio</h4>
+            
+            <div class="cmd-block">git push origin feature/bigquery-setup-ana</div>
+            
+            <h4>PASO 4: Abrir Pull Request en GitHub</h4>
+            
+            <ol>
+                <li>Ir al repositorio en GitHub</li>
+                <li>Aparecerá un banner "Compare & pull request" → clic</li>
+                <li>Rellenar el PR:
+                    <ul>
+                        <li><strong>Título:</strong> descripción clara de los cambios</li>
+                        <li><strong>Descripción:</strong> qué se ha hecho, por qué, cómo probarlo</li>
+                        <li><strong>Reviewers:</strong> asignar a un compañero del equipo</li>
+                    </ul>
+                </li>
+                <li>Create pull request</li>
+            </ol>
+            
+            <div class="card">
+                <h4>Plantilla de descripción de PR</h4>
+                <pre><code>## Qué hace este PR
+- Crea el dataset Tu_empresa en BigQuery
+- Define el esquema de la tabla customers
+- Implementa función de carga de datos
+
+## Cómo probarlo
+1. Activar entorno virtual
+2. Configurar credenciales en .env
+3. Ejecutar notebook 01_setup_bigquery.ipynb
+
+## Checklist
+- [x] Código testeado localmente
+- [x] requirements.txt actualizado
+- [x] .env.example actualizado si añadí variables</code></pre>
+            </div>
+            
+            <h4>PASO 5: Code Review</h4>
+            
+            <p>El compañero asignado revisa el código y:</p>
+            <ul>
+                <li>Lee los cambios en la pestaña "Files changed"</li>
+                <li>Deja comentarios si hay dudas o mejoras</li>
+                <li>Aprueba con "Approve" si todo está correcto</li>
+                <li>Puede pedir cambios con "Request changes"</li>
+            </ul>
+            
+            <div class="tip">
+                Cosas a revisar en un PR:
+                <ul>
+                    <li>¿El código funciona?</li>
+                    <li>¿Está bien comentado?</li>
+                    <li>¿Sigue las convenciones del proyecto?</li>
+                    <li>¿Los nombres de variables son claros?</li>
+                    <li>¿Falta algo en requirements.txt?</li>
+                </ul>
+            </div>
+            
+            <h4>PASO 6: Merge del PR</h4>
+            
+            <p>Una vez aprobado:</p>
+            <ol>
+                <li>En GitHub, en el PR, clic en "Squash and merge"</li>
+                <li>Confirmar el merge</li>
+                <li>Borrar la rama de feature (GitHub lo ofrece automáticamente)</li>
+            </ol>
+            
+            <div class="warning">
+                Usamos <strong>Squash and merge</strong> para condensar todos los commits de la rama en uno solo. 
+                Esto mantiene el historial de main limpio y fácil de leer.
+            </div>
+            
+            <h4>PASO 7: Sincronizar main localmente</h4>
+            
+            <pre><code># Volver a main
+git checkout main
+
+# Traer los últimos cambios
+git pull origin main
+
+# Borrar la rama local de feature (ya está mergeada)
+git branch -d feature/bigquery-setup-ana</code></pre>
+            
+            <h3>Manejo de conflictos</h3>
+            
+            <p>Un conflicto ocurre cuando dos personas modifican las mismas líneas de código.</p>
+            
+            <h4>Si hay conflicto al hacer merge:</h4>
+            
+            <pre><code># 1. Actualizar tu rama con los últimos cambios de main
+git checkout feature/tu-rama
+git pull origin main
+
+# 2. Git te avisará de los conflictos
+# Abrir los ficheros marcados y resolver manualmente
+
+# 3. Los conflictos se ven así:
+&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+código de tu rama
+=======
+código de main
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; main
+
+# 4. Elegir qué código mantener y borrar las marcas
+
+# 5. Añadir los ficheros resueltos
+git add fichero_resuelto.py
+
+# 6. Hacer commit
+git commit -m "fix: resolver conflictos con main"
+
+# 7. Subir
+git push origin feature/tu-rama</code></pre>
+            
+            <div class="tip">
+                Para evitar conflictos, sincroniza tu rama con main frecuentemente:
+                <pre><code>git checkout feature/tu-rama
+git pull origin main</code></pre>
+            </div>
+            
+            <h3>Comandos Git de referencia rápida</h3>
+            
+            <table>
+                <tr>
+                    <th>Comando</th>
+                    <th>Descripción</th>
+                </tr>
+                <tr>
+                    <td><code>git status</code></td>
+                    <td>Ver estado actual y cambios pendientes</td>
+                </tr>
+                <tr>
+                    <td><code>git branch</code></td>
+                    <td>Listar ramas locales</td>
+                </tr>
+                <tr>
+                    <td><code>git checkout main</code></td>
+                    <td>Cambiar a la rama main</td>
+                </tr>
+                <tr>
+                    <td><code>git checkout -b feature/X</code></td>
+                    <td>Crear y cambiar a nueva rama</td>
+                </tr>
+                <tr>
+                    <td><code>git add .</code></td>
+                    <td>Añadir todos los cambios</td>
+                </tr>
+                <tr>
+                    <td><code>git commit -m "mensaje"</code></td>
+                    <td>Guardar cambios con mensaje</td>
+                </tr>
+                <tr>
+                    <td><code>git push origin rama</code></td>
+                    <td>Subir rama al repositorio remoto</td>
+                </tr>
+                <tr>
+                    <td><code>git pull origin main</code></td>
+                    <td>Traer últimos cambios de main</td>
+                </tr>
+                <tr>
+                    <td><code>git log --oneline</code></td>
+                    <td>Ver historial de commits</td>
+                </tr>
+                <tr>
+                    <td><code>git branch -d feature/X</code></td>
+                    <td>Borrar rama local</td>
+                </tr>
+            </table>
+        </section>
+
+        <!-- ==================== SECCIÓN 4: GESTIÓN DE COSTES ==================== -->
+        <section id="costes">
+            <h2>Gestión de Costes en BigQuery</h2>
+            
+            <div class="success">
+                Este proyecto está diseñado para NO generar ningún coste. BigQuery tiene un Free Tier permanente más que suficiente para este Team Challenge.
+            </div>
+            
+            <h3>Free Tier permanente de BigQuery</h3>
+            
+            <p>Google Cloud ofrece un <strong>Free Tier permanente</strong> (no es trial temporal) que incluye cada mes:</p>
+            
+            <table>
+                <tr>
+                    <th>Recurso</th>
+                    <th>Límite gratuito mensual</th>
+                    <th>Tu proyecto (estimado)</th>
+                </tr>
+                <tr>
+                    <td><strong>Almacenamiento</strong></td>
+                    <td>10 GB</td>
+                    <td>~5-15 MB (500× menos)</td>
+                </tr>
+                <tr>
+                    <td><strong>Procesamiento de queries</strong></td>
+                    <td>1 TB (1000 GB)</td>
+                    <td>~100 MB (10000× menos)</td>
+                </tr>
+                <tr>
+                    <td><strong>Streaming inserts</strong></td>
+                    <td>10 GB</td>
+                    <td>No aplicable (usáis batch)</td>
+                </tr>
+            </table>
+            
+            <h3>¿Cuánto ocupan vuestros datos?</h3>
+            
+            <p>Con los volúmenes recomendados del TC (500 clientes, 70 productos, 2000 pedidos, etc.):</p>
+            
+            <ul>
+                <li><strong>Almacenamiento total:</strong> aproximadamente 10-15 MB</li>
+                <li><strong>Queries de verificación:</strong> procesarán unos 50-100 MB de datos</li>
+                <li><strong>Coste real:</strong> 0€ — estáis MUY por debajo del límite gratuito</li>
+            </ul>
+            
+            <h3>Buenas prácticas para evitar costes inesperados</h3>
+            
+            <h4>1. Configurar alertas de presupuesto</h4>
+            
+            <p>Configurad una alerta en $0 para recibir un aviso si os acercáis al límite del Free Tier:</p>
+            
+            <ol>
+                <li>Ir a <strong>Billing</strong> en la consola de GCP</li>
+                <li>Clic en <strong>Budgets & alerts</strong></li>
+                <li>Create Budget</li>
+                <li>Establecer límite: <code>$0</code></li>
+                <li>Alertas al 50%, 90% y 100%</li>
+            </ol>
+            
+            <h4>2. Buenas prácticas con queries</h4>
+            
+            <div class="warning">
+                <strong>NUNCA hacer:</strong>
+                <ul>
+                    <li><code>SELECT * FROM tabla</code> sin LIMIT en tablas grandes</li>
+                    <li>Queries exploratorias sin verificar el estimado de datos procesados</li>
+                    <li>Scheduled queries que ejecuten cada pocos minutos</li>
+                </ul>
+            </div>
+            
+            <div class="tip">
+                <strong>SIEMPRE hacer:</strong>
+                <ul>
+                    <li>Usar <code>LIMIT 100</code> cuando exploréis datos</li>
+                    <li>Usar el botón <strong>Preview</strong> en la consola (gratis, no consume cuota)</li>
+                    <li>Revisar el estimado "This query will process X MB" antes de ejecutar</li>
+                    <li>Usar filtros WHERE para reducir datos procesados</li>
+                </ul>
+            </div>
+            
+            <h4>3. Monitorizar el consumo</h4>
+            
+            <p>Para ver cuánto habéis consumado:</p>
+            
+            <ol>
+                <li>Ir a <strong>Billing</strong> → <strong>Reports</strong></li>
+                <li>Filtrar por servicio: BigQuery</li>
+                <li>Ver gráfico de consumo mensual</li>
+            </ol>
+            
+            <h3>Al finalizar el bootcamp</h3>
+            
+            <h4>Opción 1: Mantener el dataset (recomendada)</h4>
+            
+            <p><strong>NO hace falta borrar nada.</strong> Vuestros datos ocupan tan poco (<15 MB) que podéis dejarlo indefinidamente sin coste. BigQuery NO cobra por tablas inactivas dentro del Free Tier.</p>
+            
+            <div class="tip">
+                Podéis mantener vuestro proyecto como portfolio para mostrar en entrevistas de trabajo.
+            </div>
+            
+            <h4>Opción 2: Eliminar el dataset</h4>
+            
+            <p>Si preferís limpiar todo al terminar:</p>
+            
+            <div class="cmd-block">bq rm -r -f proyecto:Tu_empresa</div>
+            
+            <p>O desde la consola:</p>
+            <ol>
+                <li>BigQuery → vuestro dataset</li>
+                <li>Clic en los 3 puntos → Delete dataset</li>
+                <li>Confirmar</li>
+            </ol>
+            
+            <h3>Lo que NO tenéis que hacer</h3>
+            
+            <p>A diferencia de servicios como EC2 o Cloud SQL:</p>
+            
+            <ul>
+                <li>❌ <strong>NO hay que "pausar" BigQuery</strong> — no existe ese concepto</li>
+                <li>❌ <strong>NO hay que "apagar instancias"</strong> — BigQuery es serverless</li>
+                <li>❌ <strong>NO hay cargos por tener tablas creadas</strong> — solo pagas almacenamiento (gratis hasta 10 GB)</li>
+                <li>❌ <strong>NO hay cargos por hora</strong> — solo pagas por queries ejecutadas</li>
+            </ul>
+            
+            <h3>Servicios que SÍ tienen coste (evitadlos)</h3>
+            
+            <div class="warning">
+                NO activéis estos servicios a menos que sepáis lo que hacéis:
+                <ul>
+                    <li><strong>BigQuery BI Engine:</strong> tiene coste mensual</li>
+                    <li><strong>BigQuery ML:</strong> tiene costes adicionales</li>
+                    <li><strong>Compute Engine / Cloud SQL:</strong> son servicios diferentes con cargo</li>
+                    <li><strong>Cloud Storage (más de 5 GB):</strong> tiene Free Tier menor</li>
+                </ul>
+            </div>
+            
+            <h3>Resumen</h3>
+            
+            <table>
+                <tr>
+                    <th>Acción</th>
+                    <th>¿Tiene coste?</th>
+                </tr>
+                <tr>
+                    <td>Crear dataset y tablas</td>
+                    <td>❌ No (gratis)</td>
+                </tr>
+                <tr>
+                    <td>Almacenar 10-15 MB de datos</td>
+                    <td>❌ No (gratis hasta 10 GB)</td>
+                </tr>
+                <tr>
+                    <td>Ejecutar queries del TC</td>
+                    <td>❌ No (gratis hasta 1 TB procesado)</td>
+                </tr>
+                <tr>
+                    <td>Tener las tablas creadas sin usar</td>
+                    <td>❌ No (gratis)</td>
+                </tr>
+                <tr>
+                    <td>Subir un archivo de 50 GB</td>
+                    <td>⚠️ Sí (supera Free Tier)</td>
+                </tr>
+                <tr>
+                    <td>Ejecutar queries que procesen 2 TB</td>
+                    <td>⚠️ Sí (supera Free Tier)</td>
+                </tr>
+            </table>
+        </section>
+
+        <!-- ==================== SECCIÓN 5: REFERENCIA RÁPIDA ==================== -->
+        <section id="quick-ref">
+            <h2>Referencia Rápida</h2>
+            
+            <!-- Layout horizontal apilado -->
+            <div class="horizontal-stack">
+                <div class="card">
+                    <h4>Setup inicial del proyecto</h4>
+                    <pre><code># 1. Clonar repo
+git clone URL
+cd proyecto
+
+# 2. Crear entorno virtual
+python -m venv venv
+
+# 3. Activar entorno
+source venv/bin/activate
+
+# 4. Instalar dependencias
+pip install -r requirements.txt
+
+# 5. Configurar .env
+cp .env.example .env
+# Editar .env con credenciales</code></pre>
+                </div>
+                
+                <div class="card">
+                    <h4>Workflow diario</h4>
+                    <pre><code># Al empezar
+source venv/bin/activate
+git checkout main
+git pull origin main
+
+# Crear feature branch
+git checkout -b feature/mi-tarea
+
+# ... trabajar ...
+
+# Guardar cambios
+git add .
+git commit -m "feat: descripción"
+git push origin feature/mi-tarea
+
+# Abrir PR en GitHub
+# Esperar aprobación
+# Merge en GitHub
+
+# Sincronizar
+git checkout main
+git pull origin main
+git branch -d feature/mi-tarea</code></pre>
+                </div>
+                
+                <div class="card">
+                    <h4>BigQuery desde Python</h4>
+                    <pre><code>from google.cloud import bigquery
+from google.oauth2 import service_account
+import os
+
+# Cliente
+credentials = service_account.Credentials.from_service_account_file(
+    os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+)
+client = bigquery.Client(
+    project=os.getenv("GCP_PROJECT_ID"),
+    credentials=credentials
+)
+
+# Query
+query = "SELECT * FROM `proyecto.dataset.tabla` LIMIT 100"
+df = client.query(query).to_dataframe()</code></pre>
+                </div>
+                
+                <div class="card">
+                    <h4>Solución rápida a errores comunes</h4>
+                    <ul>
+                        <li><strong>ModuleNotFoundError:</strong> instalar librería con <code>pip install nombre</code></li>
+                        <li><strong>Permission denied en Git:</strong> verificar permisos de colaborador en GitHub</li>
+                        <li><strong>Credenciales BigQuery inválidas:</strong> revisar ruta en GOOGLE_APPLICATION_CREDENTIALS</li>
+                        <li><strong>Conflicto al hacer merge:</strong> hacer <code>git pull origin main</code> en tu rama y resolver manualmente</li>
+                        <li><strong>venv no se activa:</strong> verificar que estás en la carpeta correcta</li>
+                        <li><strong>"This query will process X GB":</strong> añadir WHERE o LIMIT para reducir datos procesados</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <p>Team Challenge SQL — Database Project</p>
+        <p>The Birdge Tech · Bootcamp Data Science</p>
+    </footer>
+</body>
+</html>

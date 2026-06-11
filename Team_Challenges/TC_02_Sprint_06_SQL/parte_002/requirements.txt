@@ -1,0 +1,7 @@
+google-cloud-bigquery==version
+google-auth==version
+db-dtypes==version
+pandas==version
+faker==version
+python-dotenv==version
+pyarrow==version
