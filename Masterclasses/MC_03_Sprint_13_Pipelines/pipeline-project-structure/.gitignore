@@ -1,0 +1,15 @@
+# Modelos entrenados — se generan con train.py, no se versionan en git
+models/*.joblib
+models/*.pkl
+
+# Datos procesados intermedios
+data/processed/*
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Entornos
+.venv/
+venv/

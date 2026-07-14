@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pipelines de Sklearn — Guía de referencia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0F1B2B;
+    --bg-panel: #16283D;
+    --bg-panel-raised: #1C3049;
+    --bg-code: #0B1520;
+    --grid-line: rgba(111,148,192,0.08);
+    --border: #2B4763;
+    --border-soft: #203A54;
+    --text-primary: #EDF3FA;
+    --text-secondary: #90A8C4;
+    --text-tertiary: #5D7996;
+    --accent-data: #E8A33D;
+    --accent-data-dim: #8A6023;
+    --accent-success: #5FBFA8;
+    --accent-danger: #E8574A;
+    --accent-info: #6FA8DC;
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-body: 'IBM Plex Sans', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+
+  *{ box-sizing: border-box; margin:0; padding:0; }
+
+  html{ scroll-behavior: smooth; }
+
+  body{
+    background:
+      linear-gradient(var(--grid-line) 1px, transparent 1px) 0 0/48px 48px,
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px) 0 0/48px 48px,
+      var(--bg);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection{ background: var(--accent-data); color: #0F1B2B; }
+
+  a{ color: var(--accent-info); text-decoration: none; }
+  a:hover{ text-decoration: underline; }
+
+  h1,h2,h3,h4{ font-family: var(--font-display); font-weight: 600; letter-spacing: -0.01em; }
+
+  code, .mono{ font-family: var(--font-mono); }
+  p code.mono, li code.mono{ overflow-wrap: anywhere; word-break: break-word; }
+
+  table.dtable{ display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table.dtable > tbody{ display: table; width: 100%; }
+
+  /* ===== LAYOUT SHELL ===== */
+  .shell{
+    display: grid;
+    grid-template-columns: 260px minmax(0,1fr);
+    max-width: 1320px;
+    margin: 0 auto;
+  }
+
+  @media (max-width: 900px){
+    .shell{ grid-template-columns: 1fr; }
+  }
+
+  /* ===== SIDEBAR NAV ===== */
+  .sidenav{
+    position: sticky;
+    top: 0;
+    align-self: start;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 32px 20px 40px 32px;
+    border-right: 1px solid var(--border-soft);
+  }
+  @media (max-width: 900px){
+    .sidenav{ display:none; }
+  }
+  .sidenav-brand{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent-data);
+    margin-bottom: 28px;
+  }
+  .sidenav ol{ list-style: none; counter-reset: nav; }
+  .sidenav li{ counter-increment: nav; margin-bottom: 2px; }
+  .sidenav a{
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+    color: var(--text-secondary);
+    font-size: 13.5px;
+    padding: 7px 10px;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: background .15s, color .15s;
+  }
+  .sidenav a::before{
+    content: counter(nav, decimal-leading-zero);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-tertiary);
+  }
+  .sidenav a:hover{ background: var(--bg-panel); color: var(--text-primary); }
+  .sidenav a.active{ background: var(--bg-panel-raised); color: var(--accent-data); }
+  .sidenav a.active::before{ color: var(--accent-data); }
+
+  /* ===== MAIN ===== */
+  main{ min-width: 0; }
+
+  .section{
+    padding: 88px 48px;
+    border-bottom: 1px solid var(--border-soft);
+    max-width: 880px;
+  }
+  @media (max-width: 640px){
+    .section{ padding: 56px 22px; }
+  }
+  .section-wide{ max-width: none; }
+
+  .eyebrow{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent-data);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .eyebrow::before{
+    content: "";
+    width: 18px; height: 1px;
+    background: var(--accent-data);
+  }
+
+  h2.section-title{ font-size: clamp(26px, 3.4vw, 34px); margin-bottom: 18px; }
+  .section p.lead{ font-size: 18px; color: var(--text-secondary); margin-bottom: 28px; max-width: 640px; }
+  .section p{ margin-bottom: 16px; color: var(--text-primary); }
+  .section p.muted{ color: var(--text-secondary); }
+
+  strong{ color: var(--accent-data); font-weight: 600; }
+  strong.ok{ color: var(--accent-success); }
+  strong.danger{ color: var(--accent-danger); }
+
+  /* ===== HERO ===== */
+  .hero{
+    padding: 72px 48px 40px;
+    max-width: none;
+    border-bottom: 1px solid var(--border-soft);
+  }
+  @media (max-width: 640px){ .hero{ padding: 48px 22px 24px; } }
+
+  .hero-kicker{
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent-data);
+    margin-bottom: 20px;
+  }
+  .hero h1{
+    font-size: clamp(34px, 5.2vw, 58px);
+    line-height: 1.05;
+    max-width: 15ch;
+    margin-bottom: 22px;
+  }
+  .hero h1 em{
+    font-style: normal;
+    color: var(--accent-data);
+  }
+  .hero .hero-lead{
+    font-size: 18px;
+    color: var(--text-secondary);
+    max-width: 60ch;
+    margin-bottom: 8px;
+  }
+  .hero .hero-quote{
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--text-tertiary);
+    border-left: 2px solid var(--border);
+    padding-left: 14px;
+    margin: 28px 0 48px;
+    max-width: 56ch;
+  }
+
+  .diagram-wrap{
+    background: var(--bg-code);
+    border: 1px solid var(--border-soft);
+    border-radius: 14px;
+    padding: 8px 8px 0;
+    overflow: hidden;
+  }
+  .diagram-wrap svg{ display:block; width: 100%; height: auto; }
+  .diagram-caption{
+    display:flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--text-tertiary);
+    padding: 10px 16px 12px;
+    border-top: 1px solid var(--border-soft);
+    margin-top: 4px;
+  }
+  .diagram-caption .dot{
+    display:inline-block; width:7px; height:7px; border-radius:50%;
+    background: var(--accent-success); margin-right: 6px;
+    box-shadow: 0 0 6px var(--accent-success);
+  }
+
+  .lane-label{ font-family: var(--font-mono); font-size: 11px; fill: var(--text-secondary); }
+  .pipe-line{ stroke: var(--border); stroke-width: 2; fill: none; }
+  .pipe-line-glow{ stroke: var(--border-soft); stroke-width: 8; fill: none; opacity: .35; }
+  .stage-box{ fill: var(--bg-panel-raised); stroke: var(--accent-data); stroke-width: 1.3; }
+  .stage-box-label{ font-family: var(--font-display); font-size: 13px; font-weight: 600; fill: var(--text-primary); }
+  .stage-sub{ font-family: var(--font-mono); font-size: 10px; fill: var(--text-tertiary); }
+  .endpoint-ring{ fill: none; stroke: var(--accent-success); stroke-width: 1.5; opacity:.5; }
+  .node-dot{ fill: var(--text-tertiary); }
+
+  /* ===== CALLOUTS ===== */
+  .callout{
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin: 24px 0;
+    border: 1px solid var(--border-soft);
+    background: var(--bg-panel);
+    font-size: 15px;
+  }
+  .callout-title{
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: flex; align-items:center; gap:8px;
+  }
+  .callout.info{ border-left: 3px solid var(--accent-info); }
+  .callout.info .callout-title{ color: var(--accent-info); }
+  .callout.warn{ border-left: 3px solid var(--accent-data); }
+  .callout.warn .callout-title{ color: var(--accent-data); }
+  .callout.danger{ border-left: 3px solid var(--accent-danger); }
+  .callout.danger .callout-title{ color: var(--accent-danger); }
+  .callout.ok{ border-left: 3px solid var(--accent-success); }
+  .callout.ok .callout-title{ color: var(--accent-success); }
+  .callout p:last-child{ margin-bottom:0; }
+  .callout p{ color: var(--text-secondary); }
+
+  /* ===== CODE BLOCKS ===== */
+  .code-block{
+    position: relative;
+    background: var(--bg-code);
+    border: 1px solid var(--border-soft);
+    border-radius: 10px;
+    margin: 20px 0;
+    overflow: hidden;
+  }
+  .code-block-head{
+    display:flex; justify-content: space-between; align-items:center;
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--border-soft);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-tertiary);
+  }
+  .copy-btn{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-tertiary);
+    background: transparent;
+    border: 1px solid var(--border-soft);
+    border-radius: 5px;
+    padding: 3px 9px;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .copy-btn:hover{ color: var(--text-primary); border-color: var(--border); }
+  .copy-btn.copied{ color: var(--accent-success); border-color: var(--accent-success); }
+  .code-block pre{
+    margin: 0;
+    padding: 16px 18px;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 13.5px;
+    line-height: 1.65;
+  }
+  .code-block code{ color: #C9D6E5; }
+  .tok-kw{ color: #E8A33D; }
+  .tok-str{ color: #8FCF8C; }
+  .tok-com{ color: #5D7996; font-style: italic; }
+  .tok-fn{ color: #6FA8DC; }
+  .tok-num{ color: #C98FE0; }
+
+  /* ===== TABS ===== */
+  .tabs{ margin: 24px 0; }
+  .tab-buttons{ display:flex; gap: 4px; border-bottom: 1px solid var(--border-soft); }
+  .tab-btn{
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--text-tertiary);
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: color .15s;
+  }
+  .tab-btn:hover{ color: var(--text-secondary); }
+  .tab-btn.active{ color: var(--accent-data); border-bottom-color: var(--accent-data); }
+  .tab-panel{ display: none; padding-top: 4px; }
+  .tab-panel.active{ display: block; }
+
+  /* ===== ACCORDION ===== */
+  .accordion-item{
+    border: 1px solid var(--border-soft);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    background: var(--bg-panel);
+    overflow: hidden;
+  }
+  .accordion-head{
+    display:flex; justify-content: space-between; align-items:center;
+    padding: 16px 20px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .accordion-head h4{ font-size: 15.5px; font-family: var(--font-body); font-weight: 600; }
+  .accordion-head .tag{
+    font-family: var(--font-mono); font-size: 10px; color: var(--text-tertiary);
+    border: 1px solid var(--border); padding: 2px 7px; border-radius: 4px; margin-right: 10px;
+  }
+  .accordion-icon{
+    width: 18px; height:18px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    color: var(--text-tertiary);
+    transition: transform .2s;
+  }
+  .accordion-item.open .accordion-icon{ transform: rotate(45deg); }
+  .accordion-body{
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height .25s ease;
+  }
+  .accordion-body-inner{ padding: 0 20px 20px; color: var(--text-secondary); font-size: 14.5px; }
+  .accordion-body-inner p{ color: var(--text-secondary); margin-bottom: 10px; font-size: 14.5px;}
+  .accordion-body-inner code{ background: var(--bg-code); padding: 1px 6px; border-radius: 4px; font-size: 13px; color: var(--accent-data); }
+
+  /* ===== CONCEPT CARDS GRID ===== */
+  .card-grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 14px;
+    margin: 28px 0;
+  }
+  .concept-card{
+    background: var(--bg-panel);
+    border: 1px solid var(--border-soft);
+    border-radius: 10px;
+    padding: 20px;
+  }
+  .concept-card .k{
+    font-family: var(--font-mono); font-size: 10.5px; letter-spacing:.08em;
+    color: var(--accent-data); text-transform: uppercase; margin-bottom:10px;
+  }
+  .concept-card h4{ font-size: 16px; margin-bottom: 8px; font-family: var(--font-mono); font-weight:600; }
+  .concept-card p{ font-size: 13.5px; color: var(--text-secondary); margin-bottom: 0; }
+
+  /* ===== TERMINAL (demo) ===== */
+  .terminal{
+    background: #090F17;
+    border: 1px solid var(--border-soft);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 20px 0;
+  }
+  .terminal-head{
+    display:flex; align-items:center; gap:7px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .terminal-dot{ width:9px; height:9px; border-radius:50%; background: var(--border); }
+  .terminal-title{ font-family: var(--font-mono); font-size:11px; color: var(--text-tertiary); margin-left: 6px; }
+  .terminal-body{
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.8;
+    padding: 16px 18px;
+    min-height: 160px;
+    color: #B9C7D8;
+  }
+  .terminal-line{ opacity:0; animation: fadeIn .3s forwards; white-space: pre-wrap; }
+  @keyframes fadeIn{ to{ opacity:1; } }
+  .t-ok{ color: var(--accent-success); }
+  .t-err{ color: var(--accent-danger); }
+  .t-dim{ color: var(--text-tertiary); }
+  .t-warn{ color: var(--accent-data); }
+
+  .demo-buttons{ display:flex; gap:10px; margin: 18px 0; flex-wrap: wrap; }
+  .demo-btn{
+    font-family: var(--font-mono);
+    font-size: 13px;
+    padding: 11px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--bg-panel-raised);
+    color: var(--text-primary);
+    transition: all .15s;
+  }
+  .demo-btn:hover{ border-color: var(--accent-data); color: var(--accent-data); }
+  .demo-btn.danger-hover:hover{ border-color: var(--accent-danger); color: var(--accent-danger); }
+  .demo-btn:disabled{ opacity:.4; cursor: default; }
+
+  /* ===== FOLDER TREE ===== */
+  .tree{
+    font-family: var(--font-mono);
+    font-size: 13.5px;
+    background: var(--bg-code);
+    border: 1px solid var(--border-soft);
+    border-radius: 10px;
+    padding: 20px 24px;
+    line-height: 1.9;
+    color: var(--text-secondary);
+    margin: 24px 0;
+    white-space: pre;      
+    overflow-x: auto;      
+  }
+  .tree .folder{ color: var(--accent-info); }
+  .tree .file-py{ color: var(--accent-data); }
+  .tree .file{ color: var(--text-secondary); }
+  .tree .comment{ color: var(--text-tertiary); }
+
+  /* ===== CHEATSHEET ===== */
+  .cheat-grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px,1fr));
+    gap:14px;
+    margin: 28px 0;
+  }
+  .cheat-card{
+    background: var(--bg-panel);
+    border: 1px solid var(--border-soft);
+    border-radius: 10px;
+    padding: 16px 18px;
+  }
+  .cheat-card h5{
+    font-family: var(--font-mono); font-size: 12px; color: var(--accent-data);
+    margin-bottom: 10px; letter-spacing: .04em;
+  }
+  .cheat-card pre{ font-family: var(--font-mono); font-size: 12.5px; color: #C9D6E5; white-space: pre-wrap; line-height:1.6; }
+
+  /* ===== TABLE ===== */
+  table.dtable{ width:100%; border-collapse: collapse; margin: 22px 0; font-size: 14px; }
+  table.dtable th{
+    text-align:left; font-family: var(--font-mono); font-size: 11px; text-transform:uppercase;
+    letter-spacing:.06em; color: var(--text-tertiary); padding: 10px 14px; border-bottom: 1px solid var(--border);
+  }
+  table.dtable td{ padding: 12px 14px; border-bottom: 1px solid var(--border-soft); color: var(--text-secondary); vertical-align: top;}
+  table.dtable td:first-child, table.dtable th:first-child{ color: var(--text-primary); font-family: var(--font-mono); font-size: 13px; }
+  table.dtable tr:last-child td{ border-bottom:none; }
+
+  /* ===== FOOTER ===== */
+  footer{
+    padding: 60px 48px 80px;
+    max-width: none;
+    color: var(--text-tertiary);
+    font-size: 13.5px;
+  }
+  footer a{ color: var(--text-secondary); }
+
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <nav class="sidenav" id="sidenav">
+    <div class="sidenav-brand">Pipelines · sklearn</div>
+    <ol id="navlist"></ol>
+  </nav>
+
+  <main>
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-kicker">Guía de referencia · Sklearn Pipeline</div>
+      <p class="hero-lead">
+        Un <code class="mono">Pipeline</code> empaqueta todo el preprocesado y el modelo
+        en un único objeto de sklearn. Se entrena como uno, se guarda como uno, se carga
+        como uno. Esta guía explica qué es, por qué existe, cómo se construye y qué pasa
+        exactamente cuando no lo usas.
+      </p>
+      <p class="hero-quote">
+        "Mañana alguien va a recibir tu modelo y hará un <code class="mono">model.predict(datos_nuevos)</code>.
+        Si eso no funciona, tu trabajo no tiene valor."
+      </p>
+
+      <div class="diagram-wrap">
+        <svg id="pipeSvg" viewBox="0 0 1160 380" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" role="img" aria-label="Diagrama animado de un pipeline de sklearn">
+          <defs>
+            <path id="pTrunkIn" d="M30,190 L200,190" />
+            <path id="pLane1" d="M200,190 C232,190 232,52 268,52 L606,52 C642,52 642,190 680,190" />
+            <path id="pLane2" d="M200,190 C232,190 232,141 268,141 L606,141 C642,141 642,190 680,190" />
+            <path id="pLane3" d="M200,190 C232,190 232,239 268,239 L606,239 C642,239 642,190 680,190" />
+            <path id="pLane4" d="M200,190 C232,190 232,328 268,328 L606,328 C642,328 642,190 680,190" />
+            <path id="pOut" d="M680,190 L1128,190" />
+          </defs>
+
+          <!-- static pipe geometry -->
+          <use href="#pTrunkIn" class="pipe-line-glow"/><use href="#pTrunkIn" class="pipe-line"/>
+          <use href="#pLane1" class="pipe-line-glow"/><use href="#pLane1" class="pipe-line"/>
+          <use href="#pLane2" class="pipe-line-glow"/><use href="#pLane2" class="pipe-line"/>
+          <use href="#pLane3" class="pipe-line-glow"/><use href="#pLane3" class="pipe-line"/>
+          <use href="#pLane4" class="pipe-line-glow"/><use href="#pLane4" class="pipe-line"/>
+          <use href="#pOut" class="pipe-line-glow"/><use href="#pOut" class="pipe-line"/>
+
+          <!-- split / merge nodes -->
+          <circle cx="200" cy="190" r="3.5" class="node-dot"/>
+          <circle cx="680" cy="190" r="3.5" class="node-dot"/>
+
+          <!-- entry label -->
+          <text x="30" y="172" class="lane-label">df_train</text>
+          <text x="30" y="212" class="stage-sub">12 columnas</text>
+
+          <!-- lane labels -->
+          <text x="268" y="40" class="lane-label">Fare</text>
+          <text x="268" y="129" class="lane-label">Age</text>
+          <text x="268" y="227" class="lane-label">Sex · Embarked</text>
+          <text x="268" y="316" class="lane-label">Pclass · SibSp · Parch</text>
+
+          <text x="268" y="70" class="stage-sub">log1p → escalar</text>
+          <text x="268" y="159" class="stage-sub">mediana → escalar</text>
+          <text x="268" y="257" class="stage-sub">moda → one-hot</text>
+          <text x="268" y="346" class="stage-sub">passthrough</text>
+
+          <!-- ColumnTransformer bracket label -->
+          <text x="430" y="20" text-anchor="middle" class="stage-sub" style="letter-spacing:.12em;">COLUMNTRANSFORMER — se ejecuta en paralelo por columnas</text>
+
+          <!-- model box -->
+          <rect x="770" y="163" width="150" height="54" rx="8" class="stage-box"/>
+          <text x="845" y="185" text-anchor="middle" class="stage-box-label">Modelo</text>
+          <text x="845" y="202" text-anchor="middle" class="stage-sub">XGBoost</text>
+
+          <!-- endpoint -->
+          <circle cx="1128" cy="190" r="12" class="endpoint-ring"/>
+          <circle cx="1128" cy="190" r="4" fill="#5FBFA8"/>
+          <text x="1128" y="222" text-anchor="middle" class="lane-label">predict()</text>
+
+          <!-- ===== animated packets ===== -->
+          <!-- trunk packet(s) -->
+          <circle r="5.5" fill="#7C93AD">
+            <animateMotion dur="6s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0;0.14;1"><mpath xlink:href="#pTrunkIn"/></animateMotion>
+            <animate attributeName="opacity" dur="6s" repeatCount="indefinite" calcMode="linear" values="1;1;0;0" keyTimes="0;0.14;0.16;1"/>
+          </circle>
+          <circle r="5.5" fill="#7C93AD">
+            <animateMotion dur="6s" begin="3s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0;0.14;1"><mpath xlink:href="#pTrunkIn"/></animateMotion>
+            <animate attributeName="opacity" dur="6s" begin="3s" repeatCount="indefinite" calcMode="linear" values="1;1;0;0" keyTimes="0;0.14;0.16;1"/>
+          </circle>
+
+          <!-- lane packets (x4), two waves -->
+          <g id="laneWave1">
+            <circle r="5" fill="#E8A33D">
+              <animateMotion dur="6s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.20;0.55;1"><mpath xlink:href="#pLane1"/></animateMotion>
+              <animate attributeName="opacity" dur="6s" repeatCount="indefinite" calcMode="linear" values="0;0;1;1;0;0" keyTimes="0;0.19;0.21;0.55;0.57;1"/>
+            </circle>
+            <circle r="5" fill="#6FA8DC">
+              <animateMotion dur="6s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.20;0.55;1"><mpath xlink:href="#pLane2"/></animateMotion>
+              <animate attributeName="opacity" dur="6s" repeatCount="indefinite" calcMode="linear" values="0;0;1;1;0;0" keyTimes="0;0.19;0.21;0.55;0.57;1"/>
+            </circle>
+            <circle r="5" fill="#C98FE0">
+              <animateMotion dur="6s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.20;0.55;1"><mpath xlink:href="#pLane3"/></animateMotion>
+              <animate attributeName="opacity" dur="6s" repeatCount="indefinite" calcMode="linear" values="0;0;1;1;0;0" keyTimes="0;0.19;0.21;0.55;0.57;1"/>
+            </circle>
+            <circle r="5" fill="#7C93AD">
+              <animateMotion dur="6s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.20;0.55;1"><mpath xlink:href="#pLane4"/></animateMotion>
+              <animate attributeName="opacity" dur="6s" repeatCount="indefinite" calcMode="linear" values="0;0;1;1;0;0" keyTimes="0;0.19;0.21;0.55;0.57;1"/>
+            </circle>
+          </g>
+          <g id="laneWave2">
+            <circle r="5" fill="#E8A33D">
+              <animateMotion dur="6s" begin="3s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.20;0.55;1"><mpath xlink:href="#pLane1"/></animateMotion>
+              <animate attributeName="opacity" dur="6s" begin="3s" repeatCount="indefinite" calcMode="linear" values="0;0;1;1;0;0" keyTimes="0;0.19;0.21;0.55;0.57;1"/>
+            </circle>
+            <circle r="5" fill="#6FA8DC">
+              <animateMotion dur="6s" begin="3s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.20;0.55;1"><mpath xlink:href="#pLane2"/></animateMotion>
+              <animate attributeName="opacity" dur="6s" begin="3s" repeatCount="indefinite" calcMode="linear" values="0;0;1;1;0;0" keyTimes="0;0.19;0.21;0.55;0.57;1"/>
+            </circle>
+            <circle r="5" fill="#C98FE0">
+              <animateMotion dur="6s" begin="3s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.20;0.55;1"><mpath xlink:href="#pLane3"/></animateMotion>
+              <animate attributeName="opacity" dur="6s" begin="3s" repeatCount="indefinite" calcMode="linear" values="0;0;1;1;0;0" keyTimes="0;0.19;0.21;0.55;0.57;1"/>
+            </circle>
+            <circle r="5" fill="#7C93AD">
+              <animateMotion dur="6s" begin="3s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.20;0.55;1"><mpath xlink:href="#pLane4"/></animateMotion>
+              <animate attributeName="opacity" dur="6s" begin="3s" repeatCount="indefinite" calcMode="linear" values="0;0;1;1;0;0" keyTimes="0;0.19;0.21;0.55;0.57;1"/>
+            </circle>
+          </g>
+          <!-- merged packet, two waves -->
+          <circle r="6" fill="#5FBFA8">
+            <animateMotion dur="6s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.60;0.93;1"><mpath xlink:href="#pOut"/></animateMotion>
+            <animate attributeName="opacity" dur="6s" repeatCount="indefinite" calcMode="linear" values="0;0;1;1;0;0" keyTimes="0;0.59;0.61;0.93;0.95;1"/>
+          </circle>
+          <circle r="6" fill="#5FBFA8">
+            <animateMotion dur="6s" begin="3s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.60;0.93;1"><mpath xlink:href="#pOut"/></animateMotion>
+            <animate attributeName="opacity" dur="6s" begin="3s" repeatCount="indefinite" calcMode="linear" values="0;0;1;1;0;0" keyTimes="0;0.59;0.61;0.93;0.95;1"/>
+          </circle>
+        </svg>
+        <div class="diagram-caption">
+          <span><span class="dot"></span>Un mismo objeto, un único <code class="mono">.fit()</code> / <code class="mono">.predict()</code></span>
+          <span>ColumnTransformer + Pipeline</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 1. CONTEXTO ===== -->
+    <section class="section" id="contexto">
+      <div class="eyebrow">Contexto</div>
+      <h2 class="section-title">¿Por qué sucede esto?</h2>
+      <p class="lead">No es una cuestión de estilo de código. Es una cuestión de qué pasa cuando tu modelo deja de estar en tu ordenador.</p>
+
+      <p>Cuando entrenas un modelo en un notebook, normalmente pasas por una secuencia de pasos: cargas los datos, imputas los missings, codificas las categóricas, escalas las numéricas, y <em>entonces</em> entrenas el modelo. Todo eso vive en tu cabeza y en las celdas de tu notebook, en el orden correcto, porque tú las ejecutas en orden.</p>
+
+      <p>El problema aparece en el momento en que ese modelo tiene que predecir sobre datos que <strong>no has preprocesado tú</strong>. Puede ser un servicio en producción, un script que corre cada noche, o simplemente tú mismo dentro de tres meses, con el notebook ya olvidado. En cualquiera de esos casos, alguien (o algo) va a hacer básicamente esto:</p>
+
+      <div class="code-block">
+        <div class="code-block-head"><span>predict_service.py</span></div>
+        <pre><code><span class="tok-fn">modelo</span> = cargar_modelo(<span class="tok-str">"modelo.joblib"</span>)
+<span class="tok-fn">modelo</span>.predict(datos_nuevos)</code></pre>
+      </div>
+
+      <p>Dos líneas. Sin imputaciones a mano, sin recordar qué columnas había que excluir, sin volver a escribir el encoding. Si tu modelo depende de que <em>alguien</em> ejecute antes una función de preprocesado que vive en otro archivo — un notebook, un script distinto — esas dos líneas no van a funcionar.</p>
+
+      <div class="callout warn">
+        <div class="callout-title">La pregunta que de verdad importa</div>
+        <p>No es "¿mi modelo predice bien?". Es "¿mi modelo predice bien <strong>cuando alguien que no soy yo, en un entorno que no controlo, le pasa datos crudos</strong>?". <code class="mono">Pipeline</code> es la respuesta de sklearn a esa segunda pregunta.</p>
+      </div>
+    </section>
+
+    <!-- ===== 2. CONCEPTOS FUNDAMENTALES ===== -->
+    <section class="section" id="conceptos">
+      <div class="eyebrow">Fundamentos</div>
+      <h2 class="section-title">Conceptos fundamentales</h2>
+      <p class="lead">Primero, antes de construir nada, hay cuatro piezas del vocabulario que Sklearn usa en todas partes y que hay que tener completamente claras.</p>
+
+      <div class="card-grid">
+        <div class="concept-card">
+          <div class="k">Objeto sklearn</div>
+          <h4>Estimator</h4>
+          <p>Cualquier objeto de sklearn que aprende algo de los datos mediante <code class="mono">.fit()</code>. Un modelo (<code class="mono">RandomForestClassifier</code>) es un estimator. Pero también lo es un <code class="mono">StandardScaler</code> o un <code class="mono">SimpleImputer</code> — "aprender" no implica predecir, puede significar simplemente "calcular la media" o "memorizar las categorías vistas".</p>
+        </div>
+        <div class="concept-card">
+          <div class="k">Objeto sklearn</div>
+          <h4>Transformer</h4>
+          <p>Un estimator que además de <code class="mono">.fit()</code> implementa <code class="mono">.transform()</code>. Aprende algo en <code class="mono">fit</code> (una media, un conjunto de categorías) y lo aplica en <code class="mono">transform</code>. <code class="mono">StandardScaler</code>, <code class="mono">OneHotEncoder</code> y <code class="mono">SimpleImputer</code> son transformers.</p>
+        </div>
+        <div class="concept-card">
+          <div class="k">Método</div>
+          <h4>fit(X, y)</h4>
+          <p>Aprende los parámetros necesarios a partir de los datos: la media para imputar, las categorías para codificar, los coeficientes de un modelo. No devuelve datos transformados — solo deja el objeto "entrenado" y listo para usarse.</p>
+        </div>
+        <div class="concept-card">
+          <div class="k">Método</div>
+          <h4>transform(X)</h4>
+          <p>Aplica lo aprendido en <code class="mono">fit</code> a datos nuevos. No vuelve a aprender nada — por eso en test siempre usamos <code class="mono">transform</code>, nunca <code class="mono">fit_transform</code>. Si reentrenases el scaler con los datos de test, estarías filtrando información del futuro hacia el pasado.</p>
+        </div>
+      </div>
+
+      <p>Con estas cuatro piezas ya se puede definir lo importante:</p>
+
+      <div class="card-grid">
+        <div class="concept-card" style="border-color: var(--accent-data);">
+          <div class="k">La pieza central</div>
+          <h4>Pipeline</h4>
+          <p>Una lista ordenada de transformers, donde el último paso puede ser (opcionalmente) un modelo con <code class="mono">.predict()</code>. Se comporta como un único estimator: tiene su propio <code class="mono">.fit()</code>, su propio <code class="mono">.predict()</code>. Por dentro, encadena los pasos — por fuera, es una caja negra con una interfaz idéntica a la de cualquier modelo suelto de sklearn.</p>
+        </div>
+        <div class="concept-card" style="border-color: var(--accent-data);">
+          <div class="k">El complemento imprescindible</div>
+          <h4>ColumnTransformer</h4>
+          <p>Aplica transformers <em>distintos</em> a columnas <em>distintas</em> del mismo dataframe, y luego junta el resultado en una única matriz. Sin él, tendrías que trocear el dataframe a mano, aplicar cada transformer por separado y recomponerlo tú mismo — exactamente el tipo de trabajo mecánico y propenso a errores que <code class="mono">ColumnTransformer</code> automatiza.</p>
+        </div>
+      </div>
+
+      <div class="callout info">
+        <div class="callout-title">Por qué importa la distinción fit / transform</div>
+        <p>Casi todos los bugs sutiles de preprocesado en proyectos reales vienen de aplicar <code class="mono">fit_transform</code> donde tocaba <code class="mono">transform</code>. Si escalas <code class="mono">X_test</code> con un <code class="mono">StandardScaler</code> recién ajustado sobre <code class="mono">X_test</code>, en lugar de reutilizar el que ajustaste sobre <code class="mono">X_train</code>, tu evaluación deja de ser honesta — estás usando información que en producción no tendrías. Un <code class="mono">Pipeline</code> bien construido hace esto imposible por diseño: solo expone <code class="mono">.fit()</code> una vez, sobre train, y <code class="mono">.transform()</code> / <code class="mono">.predict()</code> para cualquier otro dato.</p>
+      </div>
+    </section>
+
+    <!-- ===== 3. ANATOMÍA ===== -->
+    <section class="section" id="anatomia">
+      <div class="eyebrow">Arquitectura</div>
+      <h2 class="section-title">Anatomía del diagrama de arriba</h2>
+      <p class="lead">El diagrama del principio no es decorativo — cada tramo corresponde a una línea de código real. Así se lee:</p>
+
+      <table class="dtable">
+        <tr><th>Tramo del diagrama</th><th>Qué hace</th><th>Por qué en paralelo</th></tr>
+        <tr>
+          <td>df_train → split</td>
+          <td>El dataframe completo entra al <code class="mono">ColumnTransformer</code>, que decide qué columnas van a qué transformer</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>Carril Fare</td>
+          <td>Imputar mediana → <code class="mono">log1p</code> (cola larga) → escalar</td>
+          <td rowspan="4">Cada columna necesita un tratamiento distinto y no depende de las demás — se pueden calcular en paralelo</td>
+        </tr>
+        <tr><td>Carril Age</td><td>Imputar mediana → escalar</td></tr>
+        <tr><td>Carril Sex, Embarked</td><td>Imputar moda → One-Hot Encoding</td></tr>
+        <tr><td>Carril Pclass, SibSp, Parch</td><td><code class="mono">passthrough</code> — no se tocan, ya son numéricas utilizables</td></tr>
+        <tr>
+          <td>Merge → Modelo</td>
+          <td>Las 4 salidas se concatenan en una única matriz de features y entran al modelo</td>
+          <td>El modelo necesita ver todas las columnas juntas, ya tratadas</td>
+        </tr>
+      </table>
+
+      <div class="callout info">
+        <div class="callout-title">Un matiz importante</div>
+        <p>Los "carriles" no son filas distintas del dataset — son <strong>columnas</strong> distintas de las mismas filas. Cada fila de tu dataframe atraviesa los cuatro carriles simultáneamente (una parte de esa fila por cada carril) y se recompone entera al final. <code class="mono">ColumnTransformer</code> parte el dataframe por columnas, no por filas.</p>
+      </div>
+    </section>
+
+    <!-- ===== 4. CONSTRUCCIÓN ===== -->
+    <section class="section" id="construccion">
+      <div class="eyebrow">Paso a paso</div>
+      <h2 class="section-title">Construyendo tu primer pipeline</h2>
+      <p class="lead">Con el dataset del Titanic, de cero a un pipeline completo. Cuatro piezas pequeñas que se ensamblan al final.</p>
+
+      <p><strong>1.</strong> El carril de las categóricas (<code class="mono">Sex</code>, <code class="mono">Embarked</code>) necesita imputación + encoding, en ese orden:</p>
+      <div class="code-block">
+        <div class="code-block-head"><span>preprocesado</span><button class="copy-btn">Copiar</button></div>
+        <pre><code><span class="tok-kw">from</span> sklearn.pipeline <span class="tok-kw">import</span> Pipeline
+<span class="tok-kw">from</span> sklearn.impute <span class="tok-kw">import</span> SimpleImputer
+<span class="tok-kw">from</span> sklearn.preprocessing <span class="tok-kw">import</span> OneHotEncoder
+
+cat_pipeline = Pipeline([
+    (<span class="tok-str">"imputar_moda"</span>, SimpleImputer(strategy=<span class="tok-str">"most_frequent"</span>)),
+    (<span class="tok-str">"one_hot"</span>, OneHotEncoder(drop=<span class="tok-str">"if_binary"</span>, handle_unknown=<span class="tok-str">"ignore"</span>)),
+])</code></pre>
+      </div>
+
+      <p><code class="mono">drop="if_binary"</code> elimina una columna redundante cuando la variable solo tiene 2 categorías — evita que <code class="mono">Sex_male</code> y <code class="mono">Sex_female</code> convivan cuando una se deduce completamente de la otra. <code class="mono">handle_unknown="ignore"</code> evita que el pipeline explote si en producción llega una categoría que nunca vio en entrenamiento.</p>
+
+      <p><strong>2.</strong> El carril de <code class="mono">Fare</code>, con su transformación logarítmica:</p>
+      <div class="code-block">
+        <div class="code-block-head"><span>preprocesado</span><button class="copy-btn">Copiar</button></div>
+        <pre><code><span class="tok-kw">import</span> numpy <span class="tok-kw">as</span> np
+<span class="tok-kw">from</span> sklearn.preprocessing <span class="tok-kw">import</span> StandardScaler, FunctionTransformer
+
+fare_pipeline = Pipeline([
+    (<span class="tok-str">"imputar_mediana"</span>, SimpleImputer(strategy=<span class="tok-str">"median"</span>)),
+    (<span class="tok-str">"log1p"</span>, FunctionTransformer(np.log1p, feature_names_out=<span class="tok-str">"one-to-one"</span>)),
+    (<span class="tok-str">"escalar"</span>, StandardScaler()),
+])</code></pre>
+      </div>
+
+      <p><strong>3.</strong> Y el carril de <code class="mono">Age</code>, más simple:</p>
+      <div class="code-block">
+        <div class="code-block-head"><span>preprocesado</span><button class="copy-btn">Copiar</button></div>
+        <pre><code>age_pipeline = Pipeline([
+    (<span class="tok-str">"imputar_mediana"</span>, SimpleImputer(strategy=<span class="tok-str">"median"</span>)),
+    (<span class="tok-str">"escalar"</span>, StandardScaler()),
+])</code></pre>
+      </div>
+
+      <p><strong>4.</strong> Ahora los unimos con <code class="mono">ColumnTransformer</code>, indicando qué transformer va con qué columnas:</p>
+      <div class="code-block">
+        <div class="code-block-head"><span>preprocesado</span><button class="copy-btn">Copiar</button></div>
+        <pre><code><span class="tok-kw">from</span> sklearn.compose <span class="tok-kw">import</span> ColumnTransformer
+
+COLUMNS_TO_EXCLUDE = [<span class="tok-str">"PassengerId"</span>, <span class="tok-str">"Name"</span>, <span class="tok-str">"Cabin"</span>, <span class="tok-str">"Ticket"</span>, <span class="tok-str">"Survived"</span>]
+
+preprocessing = ColumnTransformer([
+    (<span class="tok-str">"fare"</span>, fare_pipeline, [<span class="tok-str">"Fare"</span>]),
+    (<span class="tok-str">"age"</span>, age_pipeline, [<span class="tok-str">"Age"</span>]),
+    (<span class="tok-str">"categoricas"</span>, cat_pipeline, [<span class="tok-str">"Sex"</span>, <span class="tok-str">"Embarked"</span>]),
+    (<span class="tok-str">"excluir"</span>, <span class="tok-str">"drop"</span>, COLUMNS_TO_EXCLUDE),
+], remainder=<span class="tok-str">"passthrough"</span>)  <span class="tok-com"># Pclass, SibSp, Parch se dejan tal cual</span></code></pre>
+      </div>
+
+      <p><strong>5.</strong> Por último, añadimos el modelo como paso final del pipeline:</p>
+      <div class="code-block">
+        <div class="code-block-head"><span>modelo completo</span><button class="copy-btn">Copiar</button></div>
+        <pre><code><span class="tok-kw">from</span> sklearn.ensemble <span class="tok-kw">import</span> RandomForestClassifier
+
+pipeline_completo = Pipeline([
+    (<span class="tok-str">"preprocesado"</span>, preprocessing),
+    (<span class="tok-str">"modelo"</span>, RandomForestClassifier(random_state=<span class="tok-num">42</span>)),
+])</code></pre>
+      </div>
+
+      <div class="callout ok">
+        <div class="callout-title">El detalle que cambia todo</div>
+        <p>A partir de aquí, le pasas a <code class="mono">pipeline_completo.fit()</code> el <strong>dataframe crudo completo</strong> — con <code class="mono">Name</code>, con <code class="mono">Survived</code>, con todo. El pipeline se encarga de tirar lo que no necesita. Tú ya no tienes que acordarte de excluir columnas cada vez que llamas al modelo — esa responsabilidad vive dentro del objeto, no en tu memoria.</p>
+      </div>
+    </section>
+
+    <!-- ===== 5. FIT / PREDICT ===== -->
+    <section class="section" id="fit-predict">
+      <div class="eyebrow">Por dentro</div>
+      <h2 class="section-title">Qué llama a qué, exactamente</h2>
+      <p class="lead">Un pipeline no hace magia — encadena llamadas normales de sklearn. Merece la pena ver la equivalencia explícita al menos una vez.</p>
+
+      <div class="tabs" data-tabs="fitpredict">
+        <div class="tab-buttons">
+          <button class="tab-btn active" data-tab="t-fit">pipeline.fit(X, y)</button>
+          <button class="tab-btn" data-tab="t-predict">pipeline.predict(X)</button>
+        </div>
+        <div class="tab-panel active" id="t-fit">
+          <div class="code-block">
+            <div class="code-block-head"><span>equivalencia</span></div>
+            <pre><code><span class="tok-com"># pipeline.fit(X, y) equivale a:</span>
+X1 = preprocesado.fit_transform(X, y)
+modelo.fit(X1, y)</code></pre>
+          </div>
+          <p class="muted">Cada paso, salvo el último, ejecuta <code class="mono">fit_transform</code> (aprende y transforma en el mismo movimiento). El último paso —normalmente el modelo— solo ejecuta <code class="mono">fit</code>, porque un modelo no "transforma" datos, los usa para aprender a predecir.</p>
+        </div>
+        <div class="tab-panel" id="t-predict">
+          <div class="code-block">
+            <div class="code-block-head"><span>equivalencia</span></div>
+            <pre><code><span class="tok-com"># pipeline.predict(X) equivale a:</span>
+X1 = preprocesado.transform(X)   <span class="tok-com"># transform, NO fit_transform</span>
+modelo.predict(X1)</code></pre>
+          </div>
+          <p class="muted">En <code class="mono">predict</code>, todos los pasos ejecutan <code class="mono">transform</code> — nunca <code class="mono">fit</code>. Esto es automático y es exactamente lo que evita que se te "olvide" reutilizar el scaler de train sobre test: el pipeline no te deja hacerlo de otra forma.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 6. GRIDSEARCH ===== -->
+    <section class="section" id="gridsearch">
+      <div class="eyebrow">Hiperparámetros</div>
+      <h2 class="section-title">GridSearchCV dentro de un Pipeline</h2>
+      <p class="lead">Ajustar hiperparámetros del modelo que vive dentro de un pipeline necesita una sintaxis concreta: el doble guion bajo.</p>
+
+      <div class="code-block">
+        <div class="code-block-head"><span>gridsearch</span><button class="copy-btn">Copiar</button></div>
+        <pre><code><span class="tok-kw">from</span> sklearn.model_selection <span class="tok-kw">import</span> GridSearchCV
+
+param_grid = {
+    <span class="tok-str">"modelo__n_estimators"</span>: [<span class="tok-num">100</span>, <span class="tok-num">200</span>],
+    <span class="tok-str">"modelo__max_depth"</span>: [<span class="tok-num">4</span>, <span class="tok-num">8</span>],
+}
+
+grid = GridSearchCV(pipeline_completo, param_grid, cv=<span class="tok-num">5</span>, scoring=<span class="tok-str">"balanced_accuracy"</span>)
+grid.fit(train, y_train)</code></pre>
+      </div>
+
+      <p>La regla es: <strong>nombre_del_paso</strong> + <strong>doble guion bajo</strong> + <strong>nombre_del_parámetro</strong>. En el ejemplo, el paso se llama <code class="mono">"modelo"</code> (así lo bautizamos al construir el <code class="mono">Pipeline</code>), así que sus hiperparámetros se referencian como <code class="mono">modelo__n_estimators</code>.</p>
+
+      <p>¿Por qué hace falta esto y no basta con poner <code class="mono">max_depth</code> a secas? Porque un pipeline puede tener varios pasos, y varios de ellos podrían tener parámetros con el mismo nombre. <code class="mono">GridSearchCV</code> necesita saber exactamente a qué paso te refieres — el prefijo se lo dice.</p>
+
+      <div class="callout info">
+        <div class="callout-title">Y si el pipeline tiene pipelines dentro...</div>
+        <p>La regla se encadena. Si quisieras tunear la estrategia de imputación del carril categórico directamente desde el <code class="mono">Pipeline</code> completo, sería <code class="mono">preprocesado__categoricas__imputar_moda__strategy</code> — vas bajando de nivel en nivel, con un <code class="mono">__</code> en cada salto, siguiendo exactamente los nombres que le pusiste a cada paso cuando construiste cada <code class="mono">Pipeline</code> anidado.</p>
+      </div>
+
+      <p>Una vez termina el ajuste, <code class="mono">grid.best_estimator_</code> ya es el pipeline completo reentrenado con los mejores hiperparámetros sobre todos los datos de train — preprocesado incluido. No hace falta reconstruir nada a mano.</p>
+    </section>
+
+    <!-- ===== 7. FUNCIÓN VS PIPELINE ===== -->
+    <section class="section" id="funcion-vs-pipeline">
+      <div class="eyebrow">Un caso real</div>
+      <h2 class="section-title">El error que no salta a la vista</h2>
+      <p class="lead">Hacer el mismo preprocesado con funciones sueltas de Python es perfectamente válido. También es más fácil de lo que parece que dos versiones "equivalentes" dejen de serlo sin que nadie se dé cuenta.</p>
+
+      <div class="tabs" data-tabs="funcpipe">
+        <div class="tab-buttons">
+          <button class="tab-btn active" data-tab="fp-func">Con función</button>
+          <button class="tab-btn" data-tab="fp-pipe">Con Pipeline</button>
+        </div>
+        <div class="tab-panel active" id="fp-func">
+          <div class="code-block">
+            <div class="code-block-head"><span>preprocess_data_funcion.py</span></div>
+            <pre><code><span class="tok-kw">def</span> preprocess_data_funcion(X, mean_col_imputed=[<span class="tok-str">"Age"</span>]):
+    X_temp = X.copy()
+    <span class="tok-kw">for</span> col <span class="tok-kw">in</span> mean_col_imputed:
+        valor = round(X_temp[col].mean(), <span class="tok-num">0</span>)  <span class="tok-com"># ← MEDIA</span>
+        X_temp.loc[X_temp[col].isna(), col] = valor
+    <span class="tok-kw">return</span> X_temp</code></pre>
+          </div>
+        </div>
+        <div class="tab-panel" id="fp-pipe">
+          <div class="code-block">
+            <div class="code-block-head"><span>pipeline.py</span></div>
+            <pre><code>age_pipeline = Pipeline([
+    (<span class="tok-str">"imputar_mediana"</span>, SimpleImputer(strategy=<span class="tok-str">"median"</span>)),  <span class="tok-com"># ← MEDIANA</span>
+    (<span class="tok-str">"escalar"</span>, StandardScaler()),
+])</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <p>Los dos preprocesados llevan meses conviviendo en el mismo proyecto. Los scores de validación cruzada de los dos modelos son parecidos — 0.798 uno, 0.791 el otro. Nada salta a la vista, nada falla, nada da un error.</p>
+
+      <p>Y sin embargo, no están haciendo lo mismo. Uno imputa <code class="mono">Age</code> con la <strong>mediana</strong> (28 años). El otro, con la <strong>media redondeada</strong> (30 años).</p>
+
+      <div class="callout danger">
+        <div class="callout-title">Esto no es un caso inventado para la guía</div>
+        <p>Es exactamente el tipo de bug que aparece cuando la misma decisión de preprocesado se implementa dos veces en dos sitios distintos — una vez la decides ("vamos a usar la mediana") y otra vez la escribes, por prisa o por copiar de otro notebook, de una forma sutilmente distinta. Con un <code class="mono">Pipeline</code>, el preprocesado se define <strong>una sola vez</strong>. No existe una segunda copia que pueda divergir, porque no hay segunda copia.</p>
+      </div>
+    </section>
+
+    <!-- ===== 8. GUARDAR / CARGAR ===== -->
+    <section class="section" id="guardar-cargar">
+      <div class="eyebrow">Persistencia</div>
+      <h2 class="section-title">Guardar y cargar: el modelo es un solo objeto</h2>
+      <p class="lead">Un pipeline entrenado se guarda exactamente igual que cualquier otro objeto de sklearn — porque, a efectos prácticos, lo es.</p>
+
+      <div class="code-block">
+        <div class="code-block-head"><span>guardar</span><button class="copy-btn">Copiar</button></div>
+        <pre><code><span class="tok-kw">import</span> joblib
+
+joblib.dump(pipeline_completo, <span class="tok-str">"modelo.joblib"</span>)
+
+<span class="tok-com"># En otro notebook, otro script, otro día:</span>
+modelo = joblib.load(<span class="tok-str">"modelo.joblib"</span>)
+modelo.predict(datos_nuevos)  <span class="tok-com"># datos CRUDOS, sin tratar</span></code></pre>
+      </div>
+
+      <p><code class="mono">joblib</code> y <code class="mono">pickle</code> hacen básicamente lo mismo — serializar un objeto Python a disco. <code class="mono">joblib</code> suele preferirse para objetos de sklearn porque maneja mejor arrays de numpy grandes internamente (los usa mucho un <code class="mono">RandomForestClassifier</code> con cientos de árboles), pero para el caso de uso de esta guía son intercambiables.</p>
+
+      <div class="callout warn">
+        <div class="callout-title">Lo que sí hace falta en el entorno de destino</div>
+        <p>Tener <code class="mono">scikit-learn</code> instalado (y cualquier librería del modelo, como <code class="mono">xgboost</code> si el paso final es un <code class="mono">XGBClassifier</code>). Lo que <strong>no</strong> hace falta es haber definido antes ninguna función de preprocesado — eso es precisamente lo que cambia con un pipeline.</p>
+      </div>
+    </section>
+
+    <!-- ===== 9. FALLO EN PRODUCCIÓN (DEMO INTERACTIVA) ===== -->
+    <section class="section" id="fallo-produccion">
+      <div class="eyebrow">Demo interactiva</div>
+      <h2 class="section-title">La prueba de fuego</h2>
+      <p class="lead">Simulemos exactamente lo que pasaría mañana: alguien abre un script nuevo, sin nada en memoria, y solo tiene acceso a los archivos <code class="mono">.joblib</code> guardados. Pulsa cada botón para ver qué ocurre — es el error real, capturado tal cual, no una recreación aproximada.</p>
+
+      <div class="demo-buttons">
+        <button class="demo-btn" id="btnPipeline">▶ Predecir con modelo-pipeline</button>
+        <button class="demo-btn danger-hover" id="btnFuncion">▶ Predecir con modelo-función</button>
+      </div>
+
+      <div class="terminal">
+        <div class="terminal-head">
+          <span class="terminal-dot" style="background:#E8574A"></span>
+          <span class="terminal-dot" style="background:#E8A33D"></span>
+          <span class="terminal-dot" style="background:#5FBFA8"></span>
+          <span class="terminal-title">python3 — proceso nuevo, sin nada en memoria</span>
+        </div>
+        <div class="terminal-body" id="terminalBody">
+          <div class="terminal-line t-dim">Esperando... pulsa uno de los botones de arriba.</div>
+        </div>
+      </div>
+
+      <p class="muted" style="font-size:13.5px; margin-top: -6px;">El texto del error es exactamente el que produce XGBoost en este caso real — capturado ejecutando el escenario en un entorno limpio, no inventado para esta guía.</p>
+    </section>
+
+    <!-- ===== 10. REPO REAL ===== -->
+    <section class="section" id="repo-real">
+      <div class="eyebrow">De notebook a producción</div>
+      <h2 class="section-title">Dónde vive esto en un repositorio real</h2>
+      <p class="lead">Un notebook no se despliega. Nadie programa un notebook en un cron ni lo pone detrás de una API. Así se organizaría este mismo proyecto en una empresa.</p>
+
+      <div class="tree">
+<span class="folder">titanic-pipeline-demo/</span>
+├── <span class="folder">data/</span>
+│   ├── <span class="folder">raw/</span>            <span class="comment"># Datos de entrada, tal como llegan</span>
+│   └── <span class="folder">processed/</span>      <span class="comment"># Datos intermedios, si hicieran falta</span>
+├── <span class="folder">models/</span>              <span class="comment"># Modelos .joblib — normalmente NO se versiona en git</span>
+├── <span class="folder">notebooks/</span>            <span class="comment"># Exploración y prototipado. Nunca producción</span>
+├── <span class="folder">src/</span>
+│   ├── <span class="file-py">pipeline.py</span>     <span class="comment"># Única definición del preprocesado</span>
+│   ├── <span class="file-py">train.py</span>         <span class="comment"># Entrena y guarda el modelo</span>
+│   └── <span class="file-py">predict.py</span>       <span class="comment"># Carga el modelo y predice</span>
+├── <span class="file">requirements.txt</span>
+└── <span class="file">.gitignore</span>
+      </div>
+
+      <p>La regla de oro: <strong>src/pipeline.py se define una sola vez</strong>. <code class="mono">train.py</code> lo importa para entrenar. <code class="mono">predict.py</code> ni siquiera lo necesita — solo carga el <code class="mono">.joblib</code> y llama a <code class="mono">.predict()</code>. El código de predicción no sabe nada de preprocesado porque, literalmente, no necesita saberlo.</p>
+
+      <div class="code-block">
+        <div class="code-block-head"><span>terminal</span></div>
+        <pre><code><span class="tok-com">$</span> python src/train.py
+Entrenando...  best_score (CV): 0.8152
+Modelo guardado en models/modelo_titanic.joblib
+
+<span class="tok-com">$</span> python src/predict.py
+Cargando modelo desde models/modelo_titanic.joblib...
+Primeras predicciones: [0 0 0 0 0 0 0 0 1 0]</code></pre>
+      </div>
+
+      <p class="muted">Ni una celda de notebook de por medio. Esto es lo que correría un job programado (cron, Airflow, un pipeline de CI/CD) sin que nadie tenga que tocarlo manualmente.</p>
+    </section>
+
+    <!-- ===== 11. CUÁNDO NO ===== -->
+    <section class="section" id="cuando-no">
+      <div class="eyebrow">Matices</div>
+      <h2 class="section-title">Cuándo Pipeline no es la respuesta</h2>
+      <p class="lead"><code class="mono">Pipeline</code> no es una solución universal. Hay situaciones donde cuesta más de lo que aporta.</p>
+
+      <div class="card-grid">
+        <div class="concept-card">
+          <div class="k">Limitación</div>
+          <h4>Features que cruzan filas</h4>
+          <p>Una feature tipo "media de Fare por Pclass, calculada sobre todo el dataset" no encaja de forma natural en la API columna-a-columna de <code class="mono">ColumnTransformer</code>. Se puede hacer con un <code class="mono">FunctionTransformer</code> a medida, pero se complica rápido.</p>
+        </div>
+        <div class="concept-card">
+          <div class="k">Limitación</div>
+          <h4>Debugging</h4>
+          <p>Cuando algo falla dentro de un pipeline con varios niveles de anidamiento, encontrar el paso exacto que ha fallado es más costoso que con funciones sueltas y <code class="mono">print()</code> intercalados por el camino.</p>
+        </div>
+        <div class="concept-card">
+          <div class="k">Limitación</div>
+          <h4>Prototipado desechable</h4>
+          <p>Si estás explorando un dataset por primera vez y aún no sabes qué decisiones vas a tomar, forzarlo todo a un pipeline desde el minuto uno puede ir más lento que trabajar suelto y consolidar en pipeline cuando ya tienes claro el camino.</p>
+        </div>
+      </div>
+
+      <div class="callout ok">
+        <div class="callout-title">La regla práctica</div>
+        <p>Explora como te sea más rápido. Pero el día que vayas a guardar un modelo que otra persona —o tú mismo dentro de tres meses— va a cargar sin ti al lado, empaquétalo en un <code class="mono">Pipeline</code>.</p>
+      </div>
+    </section>
+
+    <!-- ===== 12. CHEATSHEET ===== -->
+    <section class="section section-wide" id="cheatsheet">
+      <div class="eyebrow">Consulta rápida</div>
+      <h2 class="section-title">Chuleta</h2>
+      <p class="lead">Los patrones de sintaxis que más se usan, para copiar y pegar.</p>
+
+      <div class="cheat-grid">
+        <div class="cheat-card">
+          <h5>Pipeline básico</h5>
+          <pre>Pipeline([
+    ("paso1", Transformer()),
+    ("paso2", Modelo()),
+])</pre>
+        </div>
+        <div class="cheat-card">
+          <h5>ColumnTransformer</h5>
+          <pre>ColumnTransformer([
+    ("nombre", transformer, [cols]),
+    ("excluir", "drop", [cols]),
+], remainder="passthrough")</pre>
+        </div>
+        <div class="cheat-card">
+          <h5>Hiperparámetros anidados</h5>
+          <pre>param_grid = {
+    "modelo__max_depth": [4, 8],
+    "modelo__n_estimators": [100, 200],
+}</pre>
+        </div>
+        <div class="cheat-card">
+          <h5>Ver columnas de salida</h5>
+          <pre>ct.fit_transform(X)
+ct.get_feature_names_out()</pre>
+        </div>
+        <div class="cheat-card">
+          <h5>Guardar / cargar</h5>
+          <pre>import joblib
+joblib.dump(pipe, "modelo.joblib")
+pipe = joblib.load("modelo.joblib")</pre>
+        </div>
+        <div class="cheat-card">
+          <h5>Mejor modelo tras GridSearch</h5>
+          <pre>grid.fit(X, y)
+grid.best_estimator_   # ya reentrenado
+grid.best_params_</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 13. GLOSARIO ===== -->
+    <section class="section" id="glosario">
+      <div class="eyebrow">Referencia</div>
+      <h2 class="section-title">Glosario</h2>
+      <p class="lead">Cada término técnico usado en esta guía, para consulta rápida.</p>
+
+      <div id="accordionList"></div>
+    </section>
+
+    <footer>
+      <p>Guía de referencia — Pipelines de Sklearn.</p>
+    </footer>
+
+  </main>
+</div>
+
+<script>
+// ============================================================
+// 1. NAV AUTOGENERATION + SCROLLSPY
+// ============================================================
+(function(){
+  const titles = {
+    "contexto": "¿Por qué existe esto?",
+    "conceptos": "Conceptos fundamentales",
+    "anatomia": "Anatomía del diagrama",
+    "construccion": "Construyendo el pipeline",
+    "fit-predict": "fit / transform / predict",
+    "gridsearch": "GridSearchCV anidado",
+    "funcion-vs-pipeline": "El error que no se ve",
+    "guardar-cargar": "Guardar y cargar",
+    "fallo-produccion": "La prueba de fuego",
+    "repo-real": "Repositorio real",
+    "cuando-no": "Cuándo NO usarlo",
+    "cheatsheet": "Chuleta",
+    "glosario": "Glosario",
+  };
+  const navlist = document.getElementById("navlist");
+  const sections = Object.keys(titles).map(id => document.getElementById(id)).filter(Boolean);
+
+  sections.forEach(sec => {
+    const li = document.createElement("li");
+    const a = document.createElement("a");
+    a.href = "#" + sec.id;
+    a.textContent = titles[sec.id];
+    a.dataset.target = sec.id;
+    li.appendChild(a);
+    navlist.appendChild(li);
+  });
+
+  const navLinks = navlist.querySelectorAll("a");
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      const link = navlist.querySelector(`a[data-target="${entry.target.id}"]`);
+      if(!link) return;
+      if(entry.isIntersecting){
+        navLinks.forEach(l => l.classList.remove("active"));
+        link.classList.add("active");
+      }
+    });
+  }, { rootMargin: "-15% 0px -70% 0px", threshold: 0 });
+
+  sections.forEach(sec => observer.observe(sec));
+})();
+
+// ============================================================
+// 2. TABS
+// ============================================================
+(function(){
+  document.querySelectorAll(".tabs").forEach(tabGroup => {
+    const buttons = tabGroup.querySelectorAll(".tab-btn");
+    const panels = tabGroup.querySelectorAll(".tab-panel");
+    buttons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        buttons.forEach(b => b.classList.remove("active"));
+        panels.forEach(p => p.classList.remove("active"));
+        btn.classList.add("active");
+        tabGroup.querySelector("#" + btn.dataset.tab).classList.add("active");
+      });
+    });
+  });
+})();
+
+// ============================================================
+// 3. COPY TO CLIPBOARD (con fallback para file:// )
+// ============================================================
+(function(){
+  function fallbackCopy(text){
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.left = "-9999px";
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    let ok = false;
+    try{ ok = document.execCommand("copy"); }catch(e){ ok = false; }
+    document.body.removeChild(ta);
+    return ok;
+  }
+
+  document.querySelectorAll(".copy-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const pre = btn.closest(".code-block").querySelector("pre");
+      const text = pre.innerText;
+      const original = btn.textContent;
+
+      function showResult(ok){
+        btn.textContent = ok ? "¡Copiado!" : "No se pudo copiar";
+        btn.classList.toggle("copied", ok);
+        setTimeout(() => { btn.textContent = original; btn.classList.remove("copied"); }, 1600);
+      }
+
+      if(navigator.clipboard && window.isSecureContext !== false){
+        navigator.clipboard.writeText(text).then(() => showResult(true)).catch(() => showResult(fallbackCopy(text)));
+      } else {
+        showResult(fallbackCopy(text));
+      }
+    });
+  });
+})();
+
+// ============================================================
+// 4. GLOSARIO — ACCORDION
+// ============================================================
+(function(){
+  const terms = [
+    ["Estimator", "core", "Cualquier objeto de sklearn con un método <code>.fit()</code>. Es la clase más general — engloba modelos, transformers, y en general cualquier cosa que 'aprenda' algo de los datos."],
+    ["Transformer", "core", "Un estimator que además implementa <code>.transform()</code>. Aprende algo en <code>fit</code> y lo aplica en <code>transform</code>. Ejemplos: <code>StandardScaler</code>, <code>SimpleImputer</code>, <code>OneHotEncoder</code>."],
+    ["Pipeline", "core", "Lista ordenada de transformers, con un modelo opcional como último paso. Se comporta como un único estimator hacia el exterior."],
+    ["ColumnTransformer", "core", "Aplica transformers distintos a subconjuntos de columnas distintos del mismo dataframe, y concatena los resultados en una única matriz."],
+    ["fit(X, y)", "método", "Aprende los parámetros necesarios a partir de los datos (una media, unas categorías, los coeficientes de un modelo). No devuelve datos transformados."],
+    ["transform(X)", "método", "Aplica lo aprendido en <code>fit</code> a datos nuevos, sin volver a aprender nada. Se usa siempre sobre test/producción — nunca <code>fit_transform</code> ahí."],
+    ["fit_transform(X, y)", "método", "Atajo que ejecuta <code>fit</code> y <code>transform</code> en una sola llamada, sobre los mismos datos. Solo debería usarse sobre datos de entrenamiento."],
+    ["predict(X)", "método", "Método del último paso de un pipeline (el modelo). Devuelve las predicciones del modelo tras haber transformado <code>X</code> con todos los pasos anteriores."],
+    ["remainder", "parámetro", "Parámetro de <code>ColumnTransformer</code> que decide qué hacer con las columnas no mencionadas explícitamente. <code>'drop'</code> las descarta (por defecto), <code>'passthrough'</code> las deja pasar sin tocar."],
+    ["passthrough", "parámetro", "Valor de <code>remainder</code> (o de un paso del ColumnTransformer) que deja una columna exactamente como está, sin aplicar ningún transformer."],
+    ["handle_unknown='ignore'", "parámetro", "Parámetro de <code>OneHotEncoder</code> que evita un error si en producción aparece una categoría nunca vista en entrenamiento — la codifica como todo-ceros en lugar de fallar."],
+    ["drop='if_binary'", "parámetro", "Parámetro de <code>OneHotEncoder</code> que elimina una columna redundante cuando la variable categórica solo tiene dos valores posibles, evitando multicolinealidad."],
+    ["FunctionTransformer", "clase", "Envuelve cualquier función de Python (como <code>np.log1p</code>) para que se comporte como un transformer de sklearn dentro de un Pipeline."],
+    ["GridSearchCV", "clase", "Prueba exhaustivamente todas las combinaciones de un <code>param_grid</code> usando validación cruzada, y se queda con la mejor combinación de hiperparámetros."],
+    ["nombre_paso__parametro", "sintaxis", "Sintaxis con doble guion bajo para referirse a un hiperparámetro de un paso concreto dentro de un Pipeline al construir un <code>param_grid</code>. Se encadena para pipelines anidados."],
+    ["best_estimator_", "atributo", "Atributo de un <code>GridSearchCV</code> ya entrenado: el pipeline completo, reentrenado con los mejores hiperparámetros sobre todos los datos de entrenamiento. Listo para usar directamente."],
+    ["joblib / pickle", "persistencia", "Librerías para serializar (guardar) objetos de Python a disco, incluyendo pipelines enteros de sklearn. <code>joblib</code> suele preferirse para objetos con arrays de numpy grandes."],
+    ["cross_val_score", "evaluación", "Evalúa un estimator (o un pipeline entero) con validación cruzada, devolviendo un score por cada fold. Funciona igual con un pipeline que con un modelo suelto."],
+    ["get_feature_names_out()", "método", "Método de <code>ColumnTransformer</code> (y de muchos transformers) que devuelve los nombres de las columnas de salida — útil para reconstruir un DataFrame legible tras el preprocesado."],
+  ];
+
+  const list = document.getElementById("accordionList");
+  terms.forEach(([term, tag, def]) => {
+    const item = document.createElement("div");
+    item.className = "accordion-item";
+    item.innerHTML = `
+      <div class="accordion-head">
+        <h4><span class="tag">${tag}</span>${term}</h4>
+        <span class="accordion-icon">+</span>
+      </div>
+      <div class="accordion-body"><div class="accordion-body-inner"><p>${def}</p></div></div>
+    `;
+    list.appendChild(item);
+    const head = item.querySelector(".accordion-head");
+    const body = item.querySelector(".accordion-body");
+    head.addEventListener("click", () => {
+      const isOpen = item.classList.contains("open");
+      if(isOpen){
+        body.style.maxHeight = null;
+        item.classList.remove("open");
+      } else {
+        item.classList.add("open");
+        body.style.maxHeight = body.scrollHeight + "px";
+      }
+    });
+  });
+})();
+
+// ============================================================
+// 5. TERMINAL DEMO — el momento estrella
+// ============================================================
+(function(){
+  const body = document.getElementById("terminalBody");
+  const btnPipe = document.getElementById("btnPipeline");
+  const btnFunc = document.getElementById("btnFuncion");
+
+  function addLine(text, cls, delay){
+    return new Promise(resolve => {
+      setTimeout(() => {
+        const div = document.createElement("div");
+        div.className = "terminal-line" + (cls ? " " + cls : "");
+        div.textContent = text;
+        body.appendChild(div);
+        body.scrollTop = body.scrollHeight;
+        resolve();
+      }, delay);
+    });
+  }
+
+  async function runPipeline(){
+    btnPipe.disabled = true; btnFunc.disabled = true;
+    body.innerHTML = "";
+    await addLine("$ python3", "t-dim", 50);
+    await addLine(">>> import joblib, pandas as pd", "", 250);
+    await addLine(">>> from sklearn.metrics import classification_report", "", 250);
+    await addLine(">>> test = pd.read_csv('titanic_test.csv')", "", 300);
+    await addLine(">>> modelo = joblib.load('modelo_pipeline.joblib')", "", 400);
+    await addLine(">>> modelo.predict(test)", "", 500);
+    await addLine("array([0, 0, 0, 0, 0, 0, 0, 0, 1, 0, ...])", "t-ok", 500);
+    await addLine("", "", 200);
+    await addLine(">>> print(classification_report(test.Survived, modelo.predict(test)))", "", 400);
+    await addLine("              precision    recall  f1-score   support", "t-dim", 400);
+    await addLine("           0       0.79      0.83      0.81       260", "t-dim", 150);
+    await addLine("           1       0.70      0.64      0.67       158", "t-dim", 150);
+    await addLine("", "", 100);
+    await addLine("    accuracy                           0.76       418", "t-dim", 150);
+    await addLine("", "", 200);
+    await addLine("✓ Sin errores. El preprocesado viajaba dentro del .joblib.", "t-ok", 500);
+    btnPipe.disabled = false; btnFunc.disabled = false;
+  }
+
+  async function runFuncion(){
+    btnPipe.disabled = true; btnFunc.disabled = true;
+    body.innerHTML = "";
+    await addLine("$ python3", "t-dim", 50);
+    await addLine(">>> import joblib, pandas as pd", "", 250);
+    await addLine(">>> test = pd.read_csv('titanic_test.csv')", "", 300);
+    await addLine(">>> modelo = joblib.load('modelo_funcion.joblib')", "", 400);
+    await addLine(">>> modelo.predict(test)   # datos crudos, sin preprocesar", "t-warn", 500);
+    await addLine("", "", 300);
+    await addLine("Traceback (most recent call last):", "t-err", 400);
+    await addLine("  File \"xgboost/core.py\", line 2664, in inplace_predict", "t-err", 150);
+    await addLine("    data, fns, _ = _transform_pandas_df(data, enable_categorical)", "t-err", 150);
+    await addLine("  File \"xgboost/data.py\", line 367, in _invalid_dataframe_dtype", "t-err", 150);
+    await addLine("    raise ValueError(msg)", "t-err", 150);
+    await addLine("ValueError: DataFrame.dtypes for data must be int, float, bool or", "t-err", 300);
+    await addLine("category. Invalid columns: Name: str, Sex: str, Ticket: str,", "t-err", 150);
+    await addLine("Cabin: str, Embarked: str", "t-err", 150);
+    await addLine("", "", 300);
+    await addLine("✗ El modelo esperaba números. Nadie llamó a preprocess_data_funcion()", "t-err", 500);
+    await addLine("  antes de predecir — esa función no viaja con el .joblib.", "t-err", 200);
+    btnPipe.disabled = false; btnFunc.disabled = false;
+  }
+
+  btnPipe.addEventListener("click", runPipeline);
+  btnFunc.addEventListener("click", runFuncion);
+})();
+</script>
+</body>
+</html>

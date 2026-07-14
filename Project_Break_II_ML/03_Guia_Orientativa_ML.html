@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guía ML · Machine Learning Paso a Paso</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f0fa;
+    --sidebar-bg: #ede8f7;
+    --card-bg: #ffffff;
+    --accent-1: #8a6bbf;
+    --accent-2: #a68dd4;
+    --accent-3: #c2afe4;
+    --accent-4: #e0d7f5;
+    --purple-dark: #4a2e8a;
+    --purple-mid: #6a4aaa;
+    --text-main: #1e1a2e;
+    --text-muted: #7a6a9a;
+    --text-light: #a898c8;
+    --code-bg: #1e1a2e;
+    --code-text: #c2afe4;
+    --border: #d8cff0;
+    --shadow: 0 4px 24px rgba(138,107,191,0.10);
+    --shadow-hover: 0 8px 32px rgba(138,107,191,0.20);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text-main);
+    display: flex;
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  #sidebar {
+    width: 270px; min-width: 270px;
+    background: var(--sidebar-bg);
+    border-right: 1.5px solid var(--border);
+    display: flex; flex-direction: column;
+    position: sticky; top: 0; height: 100vh;
+    overflow-y: auto; padding: 0 0 32px 0;
+  }
+
+  .sidebar-header { padding: 32px 24px 20px; border-bottom: 1.5px solid var(--border); }
+  .sidebar-header .logo { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--purple-dark); letter-spacing: -0.5px; line-height: 1.2; }
+  .sidebar-header .subtitle { font-size: 0.75rem; color: var(--text-muted); letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; font-weight: 500; }
+
+  .sidebar-progress { padding: 16px 24px; border-bottom: 1.5px solid var(--border); }
+  .progress-label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 500; margin-bottom: 8px; }
+  .progress-bar-bg { background: var(--accent-4); border-radius: 99px; height: 6px; width: 100%; }
+  .progress-bar-fill { background: linear-gradient(90deg, var(--purple-dark), var(--accent-1)); height: 6px; border-radius: 99px; width: 0%; transition: width 0.5s ease; }
+  .progress-count { font-size: 0.72rem; color: var(--text-muted); margin-top: 5px; text-align: right; }
+
+  .nav-phases { padding: 16px 0; }
+  .nav-phase-title { padding: 6px 24px 4px; font-size: 0.65rem; letter-spacing: 2px; text-transform: uppercase; color: var(--text-light); font-weight: 600; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 8px 24px; cursor: pointer; border-radius: 0 8px 8px 0; margin-right: 12px; transition: background 0.2s, color 0.2s; font-size: 0.85rem; color: var(--text-muted); font-weight: 400; }
+  .nav-item:hover { background: var(--accent-4); color: var(--purple-dark); }
+  .nav-item.active { background: var(--accent-3); color: var(--purple-dark); font-weight: 500; }
+  .nav-item .nav-num { width: 22px; height: 22px; border-radius: 50%; background: var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 600; flex-shrink: 0; color: var(--purple-mid); transition: background 0.2s; }
+  .nav-item.active .nav-num, .nav-item:hover .nav-num { background: var(--accent-1); color: white; }
+  .nav-item .nav-done { margin-left: auto; color: var(--accent-1); font-size: 0.9rem; opacity: 0; transition: opacity 0.3s; }
+  .nav-item.done .nav-done { opacity: 1; }
+
+  #main { flex: 1; overflow-y: auto; padding: 0; }
+
+  .main-hero { background: linear-gradient(135deg, var(--purple-dark) 0%, var(--purple-mid) 40%, var(--accent-1) 100%); padding: 56px 60px 48px; color: white; position: relative; overflow: hidden; }
+  .main-hero::before { content: ''; position: absolute; top: -60px; right: -60px; width: 300px; height: 300px; border-radius: 50%; background: rgba(255,255,255,0.06); }
+  .main-hero::after { content: ''; position: absolute; bottom: -80px; left: 30%; width: 400px; height: 400px; border-radius: 50%; background: rgba(255,255,255,0.04); }
+
+  .hero-tag { display: inline-block; background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3); border-radius: 99px; padding: 4px 14px; font-size: 0.72rem; letter-spacing: 2px; text-transform: uppercase; font-weight: 500; margin-bottom: 16px; position: relative; z-index: 1; }
+  .hero-title { font-family: 'Playfair Display', serif; font-size: 2.8rem; line-height: 1.15; margin-bottom: 14px; position: relative; z-index: 1; }
+  .hero-desc { font-size: 0.95rem; opacity: 0.85; max-width: 580px; line-height: 1.7; position: relative; z-index: 1; }
+  .hero-stats { display: flex; gap: 32px; margin-top: 32px; position: relative; z-index: 1; }
+  .hero-stat { text-align: center; }
+  .hero-stat .num { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; line-height: 1; }
+  .hero-stat .lbl { font-size: 0.72rem; opacity: 0.7; text-transform: uppercase; letter-spacing: 1.5px; margin-top: 3px; }
+
+  .content-area { padding: 40px 60px; }
+  .phase-block { margin-bottom: 48px; }
+  .phase-header { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+  .phase-badge { padding: 6px 18px; border-radius: 99px; font-size: 0.7rem; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; }
+  .phase-title { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--purple-dark); }
+  .phase-divider { height: 1.5px; background: linear-gradient(90deg, var(--border), transparent); margin: 0 0 40px 0; }
+
+  /* Phase badge colors — gradient from light to dark across 10 phases */
+  .ph1  { background: #e8e0f8; color: #4a2e8a; }
+  .ph2  { background: #ddd5f5; color: #4a2e8a; }
+  .ph3  { background: #cfbef0; color: #4a2e8a; }
+  .ph4  { background: #c0a8e8; color: #4a2e8a; }
+  .ph5  { background: #ae90df; color: white; }
+  .ph6  { background: #9c7ad6; color: white; }
+  .ph7  { background: #8a63cc; color: white; }
+  .ph8  { background: #7a50c0; color: white; }
+  .ph9  { background: #6a3db5; color: white; }
+  .ph10 { background: #3e1f7a; color: white; }
+
+  .step-card { background: var(--card-bg); border: 1.5px solid var(--border); border-radius: 12px; margin-bottom: 12px; box-shadow: var(--shadow); transition: box-shadow 0.2s; overflow: hidden; }
+  .step-card:hover { box-shadow: var(--shadow-hover); }
+  .step-header { display: flex; align-items: center; gap: 16px; padding: 18px 24px; cursor: pointer; user-select: none; }
+  .step-num { width: 34px; height: 34px; border-radius: 50%; background: var(--accent-4); color: var(--purple-dark); display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 700; flex-shrink: 0; font-family: 'JetBrains Mono', monospace; }
+  .step-title-wrap { flex: 1; }
+  .step-title { font-weight: 500; font-size: 0.95rem; color: var(--text-main); }
+  .en-term { display: inline-block; background: var(--accent-4); color: var(--purple-mid); border-radius: 4px; padding: 1px 7px; font-size: 0.75rem; font-weight: 500; margin-left: 8px; font-family: 'JetBrains Mono', monospace; vertical-align: middle; }
+  .step-subtitle { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
+  .step-toggle { color: var(--text-muted); font-size: 1rem; transition: transform 0.2s; }
+  .step-body { display: none; padding: 0 24px 20px 74px; }
+  .step-card.open .step-body { display: block; }
+  .step-card.open .step-toggle { transform: rotate(180deg); }
+  .step-desc { color: var(--text-muted); font-size: 0.88rem; margin-bottom: 14px; line-height: 1.65; }
+
+  .code-block { background: var(--code-bg); border-radius: 10px; overflow: hidden; margin-top: 12px; font-family: 'JetBrains Mono', monospace; }
+  .code-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .code-lang { font-size: 0.72rem; color: var(--text-light); letter-spacing: 1px; text-transform: uppercase; }
+  .copy-btn { background: rgba(255,255,255,0.1); border: none; color: var(--text-light); padding: 3px 10px; border-radius: 4px; font-size: 0.72rem; cursor: pointer; transition: background 0.2s; font-family: 'DM Sans', sans-serif; }
+  .copy-btn:hover { background: rgba(255,255,255,0.2); }
+  .copy-btn.copied { color: #7dd4de; }
+  .code-content { padding: 16px; font-size: 0.82rem; color: var(--code-text); line-height: 1.7; overflow-x: auto; white-space: pre; }
+
+  .cm { color: #6a9aa4; font-style: italic; }
+  .kw { color: #c792ea; }
+  .fn { color: #82aaff; }
+  .st { color: #c3e88d; }
+  .nb { color: #f78c6c; }
+  .cl { color: #ffcb6b; }
+  .op { color: #89ddff; }
+
+  .checklist { list-style: none; padding: 0; margin-top: 12px; }
+  .checklist li { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; cursor: pointer; border-bottom: 1px solid var(--border); font-size: 0.88rem; color: var(--text-muted); transition: color 0.2s; }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist li:hover { color: var(--purple-dark); }
+  .checklist li.checked { color: var(--purple-dark); text-decoration: line-through; opacity: 0.6; }
+  .check-box { width: 18px; height: 18px; border-radius: 4px; border: 1.5px solid var(--border); flex-shrink: 0; margin-top: 2px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; background: white; }
+  .checked .check-box { background: var(--accent-1); border-color: var(--accent-1); }
+  .checked .check-box::after { content: '✓'; font-size: 0.7rem; color: white; font-weight: 700; }
+
+  .tip-box { background: var(--accent-4); border-left: 3px solid var(--accent-1); border-radius: 0 8px 8px 0; padding: 12px 16px; font-size: 0.85rem; color: var(--purple-dark); margin: 12px 0; }
+  .warning-box { background: #fff8e6; border-left: 3px solid #f0c040; border-radius: 0 8px 8px 0; padding: 12px 16px; font-size: 0.85rem; color: #7a5a00; margin: 12px 0; }
+
+  .metric-table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 0.84rem; }
+  .metric-table th { background: var(--accent-4); color: var(--purple-dark); padding: 8px 12px; text-align: left; font-weight: 600; }
+  .metric-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); color: var(--text-muted); }
+  .metric-table tr:last-child td { border-bottom: none; }
+  .metric-table tr:hover td { background: var(--bg); }
+
+  #sidebar::-webkit-scrollbar { width: 4px; }
+  #sidebar::-webkit-scrollbar-track { background: transparent; }
+  #sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+  #main::-webkit-scrollbar { width: 6px; }
+  #main::-webkit-scrollbar-track { background: transparent; }
+  #main::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+  /* ── Sidebar interactivo ────────────────────────── */
+  #sidebar { transition: width 0.3s ease, min-width 0.3s ease; }
+  #sidebar.collapsed { width: 60px; min-width: 60px; }
+  #sidebar.collapsed .sidebar-header .logo,
+  #sidebar.collapsed .sidebar-header .subtitle,
+  #sidebar.collapsed .sidebar-progress,
+  #sidebar.collapsed .nav-phase-title,
+  #sidebar.collapsed .nav-item span:not(.nav-num),
+  #sidebar.collapsed .nav-done { display: none; }
+  #sidebar.collapsed .nav-item { justify-content: center; padding: 10px; margin-right: 0; border-radius: 0; }
+  #sidebar.collapsed .nav-item .nav-num { margin: 0; }
+
+  .sidebar-toggle {
+    position: absolute; top: 12px; right: -14px;
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--card-bg); border: 1.5px solid var(--border);
+    box-shadow: 0 2px 8px rgba(138,107,191,0.15);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; z-index: 100; color: var(--purple-mid);
+    font-size: 0.75rem; transition: transform 0.3s, background 0.2s;
+    user-select: none;
+  }
+  .sidebar-toggle:hover { background: var(--accent-4); }
+  #sidebar.collapsed .sidebar-toggle { transform: rotate(180deg); }
+
+  /* Mini progress bar por fase en nav */
+  .nav-item { position: relative; }
+  .nav-phase-bar {
+    position: absolute; bottom: 0; left: 0;
+    height: 2px; background: var(--accent-1);
+    border-radius: 0 2px 2px 0;
+    width: 0%; transition: width 0.4s ease;
+    opacity: 0.7;
+  }
+  .nav-item.active .nav-phase-bar { opacity: 1; }
+
+  /* Tooltip en modo colapsado */
+  #sidebar.collapsed .nav-item { position: relative; }
+  #sidebar.collapsed .nav-item::after {
+    content: attr(data-label);
+    position: absolute; left: 56px; top: 50%; transform: translateY(-50%);
+    background: var(--purple-dark); color: white;
+    padding: 4px 10px; border-radius: 6px; font-size: 0.78rem;
+    white-space: nowrap; pointer-events: none;
+    opacity: 0; transition: opacity 0.15s;
+    z-index: 200; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  #sidebar.collapsed .nav-item:hover::after { opacity: 1; }
+</style>
+</head>
+<body>
+
+<nav id="sidebar">
+  <div class="sidebar-toggle" id="sidebarToggle" title="Colapsar menú">◀</div>
+  <div class="sidebar-header">
+    <div class="logo">Guía ML</div>
+    <div class="subtitle">Machine Learning paso a paso</div>
+  </div>
+  <div class="sidebar-progress">
+    <div class="progress-label">Progreso total</div>
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressBar"></div></div>
+    <div class="progress-count" id="progressCount">0 / 0 checks</div>
+  </div>
+  <div class="nav-phases">
+    <div class="nav-phase-title">Fases</div>
+    <div class="nav-item active" data-phase="phase1" data-label="Git Flow" onclick="navClick(this,'phase1')"><span class="nav-num">1</span> Git Flow<span class="nav-done">✓</span><span class="nav-phase-bar" id="pbar1"></span></div>
+    <div class="nav-item" data-phase="phase2" data-label="Business Case" onclick="navClick(this,'phase2')"><span class="nav-num">2</span> Business Case<span class="nav-done">✓</span><span class="nav-phase-bar" id="pbar2"></span></div>
+    <div class="nav-item" data-phase="phase3" data-label="Data Understanding" onclick="navClick(this,'phase3')"><span class="nav-num">3</span> Data Understanding<span class="nav-done">✓</span><span class="nav-phase-bar" id="pbar3"></span></div>
+    <div class="nav-item" data-phase="phase4" data-label="EDA Dirigido" onclick="navClick(this,'phase4')"><span class="nav-num">4</span> EDA Dirigido<span class="nav-done">✓</span><span class="nav-phase-bar" id="pbar4"></span></div>
+    <div class="nav-item" data-phase="phase5" data-label="Feature Engineering" onclick="navClick(this,'phase5')"><span class="nav-num">5</span> Feature Engineering<span class="nav-done">✓</span><span class="nav-phase-bar" id="pbar5"></span></div>
+    <div class="nav-item" data-phase="phase6" data-label="Preprocesado" onclick="navClick(this,'phase6')"><span class="nav-num">6</span> Preprocesado<span class="nav-done">✓</span><span class="nav-phase-bar" id="pbar6"></span></div>
+    <div class="nav-item" data-phase="phase7" data-label="Modelado" onclick="navClick(this,'phase7')"><span class="nav-num">7</span> Modelado<span class="nav-done">✓</span><span class="nav-phase-bar" id="pbar7"></span></div>
+    <div class="nav-item" data-phase="phase8" data-label="Optimización" onclick="navClick(this,'phase8')"><span class="nav-num">8</span> Optimización<span class="nav-done">✓</span><span class="nav-phase-bar" id="pbar8"></span></div>
+    <div class="nav-item" data-phase="phase9" data-label="Evaluación Final" onclick="navClick(this,'phase9')"><span class="nav-num">9</span> Evaluación Final<span class="nav-done">✓</span><span class="nav-phase-bar" id="pbar9"></span></div>
+    <div class="nav-item" data-phase="phase10" data-label="Persistencia" onclick="navClick(this,'phase10')"><span class="nav-num">10</span> Persistencia<span class="nav-done">✓</span><span class="nav-phase-bar" id="pbar10"></span></div>
+  </div>
+</nav>
+
+<main id="main">
+  <div class="main-hero">
+    <span class="hero-tag">Machine Learning · Guía Paso a Paso</span>
+    <h1 class="hero-title">Proyecto de<br>Machine Learning</h1>
+    <p class="hero-desc">De los datos en bruto al modelo entrenado, evaluado y guardado. Sigue cada fase de forma ordenada y justifica cada decisión técnica con el problema de negocio.</p>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="num">10</div><div class="lbl">Fases</div></div>
+      <div class="hero-stat"><div class="num">36</div><div class="lbl">Pasos</div></div>
+      <div class="hero-stat"><div class="num">3</div><div class="lbl">Tipos de problema</div></div>
+    </div>
+  </div>
+
+  <div class="content-area">
+
+    <!-- ══════════════════════════════════════════
+         FASE 1 · GIT FLOW
+    ══════════════════════════════════════════ -->
+    <div class="phase-block" id="phase1">
+      <div class="phase-header">
+        <span class="phase-badge ph1">Fase 01</span>
+        <h2 class="phase-title">Git Flow para Trabajo en Equipo</h2>
+      </div>
+
+      <div class="step-card" id="step-1">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">1</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Estructura de ramas <span class="en-term">Branch Strategy</span></div>
+            <div class="step-subtitle">main → develop → feature/ — nunca trabajes directo en main</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Seguiréis un <strong>Git Flow simplificado</strong> con tres niveles de ramas. Cada bloque de trabajo tiene su propia rama <code>feature/</code>; nadie toca <code>main</code> ni <code>develop</code> directamente.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Estructura de ramas</span></div>
+            <div class="code-content">main            ← producción · solo código revisado y funcional
+  └── develop   ← integración · aquí se une el trabajo de todos
+        ├── feature/eda              ← EDA dirigido y análisis del target
+        ├── feature/feature-eng      ← creación de nuevas variables
+        ├── feature/preprocessing    ← limpieza, encoding y escalado
+        ├── feature/modeling         ← entrenamiento y comparativa
+        └── feature/evaluation       ← evaluación final y persistencia</div>
+          </div>
+          <div class="tip-box"><strong>💡 Reparto sugerido para 3 personas:</strong><br>
+            Persona A → <code>feature/eda</code> + <code>feature/feature-eng</code><br>
+            Persona B → <code>feature/preprocessing</code> + <code>feature/modeling</code><br>
+            Persona C → <code>feature/modeling</code> + <code>feature/evaluation</code>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card" id="step-2">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">2</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Configuración inicial <span class="en-term">Repo Setup</span></div>
+            <div class="step-subtitle">Lo hace un solo miembro del equipo, una sola vez</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">El miembro que crea el repositorio configura la rama <code>develop</code> y comparte el enlace con el equipo. El resto clona y activa <code>develop</code> como rama de trabajo.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Bash · Git</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+            <div class="code-content"><span class="cm"># Persona A — crea el repo en GitHub y lo configura</span>
+git clone https://github.com/usuario/ML_proyecto.git
+cd ML_proyecto
+git checkout -b develop
+git push -u origin develop
+
+<span class="cm"># Personas B y C — clonan y activan develop</span>
+git clone https://github.com/usuario/ML_proyecto.git
+cd ML_proyecto
+git checkout develop</div>
+          </div>
+          <ul class="checklist">
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Repositorio creado con nombre <code>ML_[temática-del-proyecto]</code></span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Rama <code>develop</code> creada y publicada en remoto</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Todos los miembros han clonado el repositorio</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span><code>.gitignore</code> añadido con datos pesados y caché excluidos</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="step-card" id="step-3">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">3</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Ciclo de trabajo diario <span class="en-term">Daily Workflow</span></div>
+            <div class="step-subtitle">pull → branch → commit → push → PR — este ciclo se repite siempre</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Cada miembro sigue este ciclo para cada bloque de trabajo. Empieza siempre actualizando <code>develop</code> antes de crear una rama nueva para evitar conflictos.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Bash · Git</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+            <div class="code-content"><span class="cm"># 1. Actualizar develop antes de empezar</span>
+git checkout develop
+git pull origin develop
+
+<span class="cm"># 2. Crear rama para la tarea</span>
+git checkout -b feature/feature-eng
+
+<span class="cm"># 3. Trabajar y commitear con frecuencia</span>
+git add .
+git commit -m <span class="st">"feat: ratio gasto/ingreso calculado sobre train y test"</span>
+git commit -m <span class="st">"feat: extracción de mes y día de la semana desde fecha_compra"</span>
+git commit -m <span class="st">"fix: corregido binning de edad que generaba NaN en test"</span>
+
+<span class="cm"># 4. Subir la rama y abrir Pull Request hacia develop</span>
+git push -u origin feature/feature-eng
+<span class="cm"># GitHub → Pull Requests → New PR → Base: develop ← Compare: feature/feature-eng</span>
+
+<span class="cm"># 5. Tras el merge (lo aprueba otro miembro), actualizar develop</span>
+git checkout develop
+git pull origin develop</div>
+          </div>
+          <div class="warning-box"><strong>⚠️ Regla de oro:</strong> Nunca hagas <code>git push origin main</code> ni <code>git push origin develop</code> directamente. Todo cambio pasa por un Pull Request revisado por otro miembro del equipo.</div>
+        </div>
+      </div>
+
+      <div class="step-card" id="step-4">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">4</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Mensajes de commit <span class="en-term">Commit Convention</span></div>
+            <div class="step-subtitle">Un mensaje claro vale más que diez commits de "changes"</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Usad el prefijo adecuado para que el historial del proyecto sea legible de un vistazo. Un buen commit describe <em>qué</em> se hizo y <em>por qué</em>, no <em>cómo</em>.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Convención de prefijos</span></div>
+            <div class="code-content"><span class="cm"># ✓ Ejemplos bien escritos</span>
+feat:     <span class="st">"feat: añadido StandardScaler al pipeline de preprocesado"</span>
+fix:      <span class="st">"fix: corregido data leakage en la imputación del test set"</span>
+docs:     <span class="st">"docs: actualizado README con instrucciones de reproducción"</span>
+refactor: <span class="st">"refactor: extraída función de encoding a utils/preprocessing.py"</span>
+data:     <span class="st">"data: añadida muestra de datos en src/data_sample/"</span>
+model:    <span class="st">"model: evaluación final RandomForest contra test — F1: 0.87"</span>
+
+<span class="cm"># ✗ Ejemplos mal escritos</span>
+<span class="op">✗</span>  <span class="st">"changes"</span>   <span class="op">✗</span>  <span class="st">"arreglado"</span>   <span class="op">✗</span>  <span class="st">"wip"</span>   <span class="op">✗</span>  <span class="st">"subida final"</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card" id="step-5">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">5</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Pull Requests y revisión de código <span class="en-term">Code Review</span></div>
+            <div class="step-subtitle">Nadie aprueba su propio PR — siempre lo revisa otro miembro</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">La revisión de código en los Pull Requests es donde más se aprende. Asigna siempre un <em>reviewer</em> diferente al autor. Antes de aprobar, el reviewer ejecuta el código y comprueba que tiene sentido.</p>
+          <ul class="checklist">
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>El PR tiene un título descriptivo de qué hace</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>El reviewer ejecuta el código antes de aprobar</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>No hay conflictos con develop antes del merge</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>La rama <code>feature/</code> se borra tras el merge</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="step-card" id="step-6">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">6</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Entrega final y tag <span class="en-term">Release Tag</span></div>
+            <div class="step-subtitle">Merge a main + tag v1.0 para marcar la entrega</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Cuando el proyecto está terminado y todo el código está en <code>develop</code>, se hace el merge final a <code>main</code> y se crea un tag que marca la versión de entrega.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Bash · Git</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+            <div class="code-content"><span class="cm"># Merge final de develop a main</span>
+git checkout main
+git merge develop
+git push origin main
+
+<span class="cm"># Crear tag de entrega</span>
+git tag -a v1.0 -m <span class="st">"Entrega final Proyecto ML"</span>
+git push origin v1.0</div>
+          </div>
+          <div class="tip-box"><strong>💡 Extra:</strong> El tag <code>v1.0</code> permite a los evaluadores acceder exactamente al estado del repositorio en el momento de la entrega, aunque después sigáis trabajando.</div>
+          <ul class="checklist">
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Todo el trabajo integrado en <code>develop</code> sin conflictos</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Merge final de <code>develop</code> a <code>main</code> realizado</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Tag <code>v1.0</code> creado y publicado en remoto</span></li>
+          </ul>
+        </div>
+      </div>
+
+    </div><!-- /phase1 -->
+    <div class="phase-divider"></div>
+
+    <!-- ══════════════════════════════════════════
+         FASE 2 · BUSINESS CASE
+    ══════════════════════════════════════════ -->
+    <div class="phase-block" id="phase2">
+      <div class="phase-header">
+        <span class="phase-badge ph2">Fase 02</span>
+        <h2 class="phase-title">Business Case & Problem Definition</h2>
+      </div>
+
+      <div class="step-card" id="step-7">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">7</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Business Understanding <span class="en-term">Problema de negocio</span></div>
+            <div class="step-subtitle">¿Qué decisión mejorará si el modelo funciona bien?</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Define el problema de negocio con precisión. Un modelo de ML no es un fin en sí mismo, sino un medio para tomar mejores decisiones. Responde: ¿para qué sirve este modelo? ¿quién lo usará? ¿qué harán diferente gracias a él?</p>
+          <ul class="checklist">
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Problema de negocio definido con claridad</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Usuario o equipo destinatario identificado</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Impacto esperado del modelo documentado</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="step-card" id="step-8">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">8</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Objetivo de modelado <span class="en-term">ML Objective</span></div>
+            <div class="step-subtitle">Define el tipo de problema y la variable target</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Traduce el problema de negocio a un objetivo de ML concreto. ¿Es un problema de <strong>clasificación</strong>, <strong>regresión</strong> o <strong>clustering</strong>? ¿Cuál es la variable target?</p>
+          <table class="metric-table">
+            <tr><th>Tipo de problema</th><th>Ejemplos</th><th>Métricas habituales</th></tr>
+            <tr><td>Clasificación binaria</td><td>Fraude sí/no, churn sí/no</td><td>ROC-AUC, F1, Precision/Recall</td></tr>
+            <tr><td>Clasificación multiclase</td><td>Categoría de producto</td><td>Accuracy, F1-macro, Confusion Matrix</td></tr>
+            <tr><td>Regresión</td><td>Precio de vivienda, demanda</td><td>RMSE, MAE, R²</td></tr>
+            <tr><td>Clustering</td><td>Segmentación de clientes</td><td>Silhouette, Davies-Bouldin</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="step-card" id="step-9">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">9</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Plan de acción y adquisición de datos <span class="en-term">Action Plan</span></div>
+            <div class="step-subtitle">¿Qué harás con las predicciones? ¿Dónde están los datos?</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Define de antemano qué harás en función de los resultados del modelo. Luego lista los datos necesarios y valida su disponibilidad — si no existen o no son accesibles, hay que replantear el proyecto.</p>
+          <div class="tip-box"><strong>💡 Consejo:</strong> Un modelo con un 70% de accuracy puede ser excelente en un contexto o inútil en otro. El plan de acción define el listón mínimo aceptable.</div>
+          <ul class="checklist">
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Acciones definidas para cada resultado del modelo</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Umbral de rendimiento mínimo definido</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Fuentes de datos identificadas y accesibles</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Licencia y privacidad de los datos verificadas</span></li>
+          </ul>
+        </div>
+      </div>
+
+    </div><!-- /phase2 -->
+    <div class="phase-divider"></div>
+
+    <!-- ══════════════════════════════════════════
+         FASE 3 · DATA UNDERSTANDING
+    ══════════════════════════════════════════ -->
+    <div class="phase-block" id="phase3">
+      <div class="phase-header">
+        <span class="phase-badge ph3">Fase 03</span>
+        <h2 class="phase-title">Data Understanding</h2>
+      </div>
+
+      <div class="step-card" id="step-10">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">10</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Exploratorio inicial <span class="en-term">First Look</span></div>
+            <div class="step-subtitle">Primer vistazo al dataset: shape, tipos y missings</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Antes de cualquier análisis, obtén la información básica del dataset.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python · Pandas</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+            <div class="code-content"><span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+df = pd.<span class="fn">read_csv</span>(<span class="st">'data.csv'</span>)
+<span class="fn">print</span>(<span class="st">f"Shape: {df.shape}"</span>)
+df.<span class="fn">info</span>()
+df.<span class="fn">describe</span>(include=<span class="st">'all'</span>)
+(df.<span class="fn">isnull</span>().<span class="fn">mean</span>() * <span class="nb">100</span>).<span class="fn">sort_values</span>(ascending=<span class="kw">False</span>).<span class="fn">round</span>(<span class="nb">1</span>)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card" id="step-11">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">11</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Tabla de variables <span class="en-term">Data Dictionary</span></div>
+            <div class="step-subtitle">Inventaría todas las variables e identifica el target</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Documenta cada variable: nombre, tipo, naturaleza, aportación esperada al modelo. Identifica claramente la variable target y marca las que descartarás.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python · Pandas</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+            <div class="code-content"><span class="cm"># Data dictionary automático</span>
+data_dict = pd.<span class="fn">DataFrame</span>({
+    <span class="st">'columna'</span>: df.columns,
+    <span class="st">'dtype'</span>: df.dtypes.<span class="fn">values</span>,
+    <span class="st">'nulos_pct'</span>: (df.<span class="fn">isnull</span>().<span class="fn">mean</span>() * <span class="nb">100</span>).<span class="fn">round</span>(<span class="nb">1</span>).<span class="fn">values</span>,
+    <span class="st">'unicos'</span>: df.<span class="fn">nunique</span>().<span class="fn">values</span>,
+    <span class="st">'ejemplo'</span>: [df[c].<span class="fn">dropna</span>().<span class="fn">iloc</span>[<span class="nb">0</span>] <span class="kw">if</span> <span class="fn">len</span>(df[c].<span class="fn">dropna</span>()) > <span class="nb">0</span> <span class="kw">else</span> <span class="kw">None</span> <span class="kw">for</span> c <span class="kw">in</span> df.columns]
+})
+data_dict</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card" id="step-12">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">12</div>
+          <div class="step-title-wrap">
+            <div class="step-title">División Train / Test <span class="en-term">Train-Test Split</span></div>
+            <div class="step-subtitle">⚠️ Haz esto ANTES de cualquier exploración profunda</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">La separación train/test es el primer paso técnico y el más importante. El conjunto de test no debe tocarse hasta la evaluación final.</p>
+          <div class="warning-box"><strong>⚠️ Data Leakage:</strong> Si exploras o procesas test antes de la evaluación final, estarás contaminando los resultados. El modelo parecerá mejor de lo que realmente es.</div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python · Scikit-learn</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+            <div class="code-content"><span class="kw">from</span> sklearn.model_selection <span class="kw">import</span> <span class="cl">train_test_split</span>
+
+TARGET = <span class="st">'nombre_target'</span>
+X = df.<span class="fn">drop</span>(columns=[TARGET])
+y = df[TARGET]
+
+X_train, X_test, y_train, y_test = <span class="cl">train_test_split</span>(
+    X, y, test_size=<span class="nb">0.2</span>, random_state=<span class="nb">42</span>,
+    stratify=y  <span class="cm"># solo en clasificación</span>
+)
+<span class="fn">print</span>(<span class="st">f"Train: {X_train.shape}, Test: {X_test.shape}"</span>)</div>
+          </div>
+          <ul class="checklist">
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Dataset dividido en train y test</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Proporciones de clases verificadas en ambos splits</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>random_state fijado para reproducibilidad</span></li>
+          </ul>
+        </div>
+      </div>
+
+    </div><!-- /phase3 -->
+    <div class="phase-divider"></div>
+
+    <!-- ══════════════════════════════════════════
+         FASE 4 · EDA DIRIGIDO
+    ══════════════════════════════════════════ -->
+    <div class="phase-block" id="phase4">
+      <div class="phase-header">
+        <span class="phase-badge ph4">Fase 04</span>
+        <h2 class="phase-title">EDA Dirigido al Modelado</h2>
+      </div>
+
+      <div class="step-card" id="step-13">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">13</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Análisis del target <span class="en-term">Target Analysis</span></div>
+            <div class="step-subtitle">Entiende en profundidad lo que vas a predecir</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">El análisis del target determina muchas decisiones posteriores: la métrica de evaluación, la necesidad de balanceo, posibles transformaciones...</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python · Pandas + Seaborn</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+            <div class="code-content"><span class="kw">import</span> matplotlib.pyplot <span class="kw">as</span> plt
+<span class="kw">import</span> seaborn <span class="kw">as</span> sns
+
+<span class="cm"># Clasificación: balanceo de clases</span>
+y_train.<span class="fn">value_counts</span>(normalize=<span class="kw">True</span>).<span class="fn">plot</span>(kind=<span class="st">'bar'</span>)
+plt.<span class="fn">title</span>(<span class="st">'Distribución del target'</span>); plt.<span class="fn">show</span>()
+
+<span class="cm"># Regresión: distribución y asimetría</span>
+fig, axes = plt.<span class="fn">subplots</span>(<span class="nb">1</span>, <span class="nb">2</span>, figsize=(<span class="nb">12</span>, <span class="nb">4</span>))
+y_train.<span class="fn">hist</span>(bins=<span class="nb">40</span>, ax=axes[<span class="nb">0</span>])
+np.<span class="fn">log1p</span>(y_train).<span class="fn">hist</span>(bins=<span class="nb">40</span>, ax=axes[<span class="nb">1</span>])
+<span class="fn">print</span>(<span class="st">f"Skewness: {y_train.skew():.2f}"</span>)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card" id="step-14">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">14</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Features vs. Target <span class="en-term">Feature-Target Relationship</span></div>
+            <div class="step-subtitle">¿Qué variables se relacionan más con lo que quieres predecir?</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Analiza cómo cada variable independiente se relaciona con el target. Esto te ayuda a identificar las features más predictivas.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python · Seaborn</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+            <div class="code-content"><span class="cm"># Numérica vs. target clasificación: distribución por clase</span>
+sns.<span class="fn">boxplot</span>(data=X_train.<span class="fn">join</span>(y_train), x=TARGET, y=<span class="st">'feature_num'</span>)
+plt.<span class="fn">show</span>()
+
+<span class="cm"># Numérica vs. target regresión: scatter</span>
+sns.<span class="fn">scatterplot</span>(x=X_train[<span class="st">'feature'</span>], y=y_train, alpha=<span class="nb">0.3</span>)
+plt.<span class="fn">show</span>()
+
+<span class="cm"># Categórica vs. target: tasa por categoría</span>
+X_train.<span class="fn">join</span>(y_train).<span class="fn">groupby</span>(<span class="st">'feature_cat'</span>)[TARGET].<span class="fn">mean</span>().<span class="fn">sort_values</span>().<span class="fn">plot</span>(kind=<span class="st">'barh'</span>)
+plt.<span class="fn">show</span>()</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card" id="step-15">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">15</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Correlaciones y outliers <span class="en-term">Multicollinearity & Outliers</span></div>
+            <div class="step-subtitle">Detecta redundancias entre features y valores atípicos</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Features muy correlacionadas entre sí aportan información redundante. Los outliers pueden distorsionar el entrenamiento en modelos sensibles a la escala.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python · Seaborn + Pandas</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+            <div class="code-content"><span class="cm"># Heatmap de correlación</span>
+corr = X_train.<span class="fn">select_dtypes</span>(include=<span class="st">'number'</span>).<span class="fn">corr</span>()
+plt.<span class="fn">figure</span>(figsize=(<span class="nb">12</span>, <span class="nb">8</span>))
+sns.<span class="fn">heatmap</span>(corr, annot=<span class="kw">True</span>, fmt=<span class="st">'.2f'</span>, cmap=<span class="st">'coolwarm'</span>, center=<span class="nb">0</span>)
+plt.<span class="fn">show</span>()
+
+<span class="cm"># Outliers por IQR</span>
+Q1 = X_train[<span class="st">'feature'</span>].<span class="fn">quantile</span>(<span class="nb">0.25</span>)
+Q3 = X_train[<span class="st">'feature'</span>].<span class="fn">quantile</span>(<span class="nb">0.75</span>)
+IQR = Q3 - Q1
+outliers = ((X_train[<span class="st">'feature'</span>] < Q1 - <span class="nb">1.5</span>*IQR) | (X_train[<span class="st">'feature'</span>] > Q3 + <span class="nb">1.5</span>*IQR))
+<span class="fn">print</span>(<span class="st">f"Outliers: {outliers.sum()}"</span>)</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /phase4 -->
+    <div class="phase-divider"></div>
+
+    <!-- ══════════════════════════════════════════
+         FASE 5 · FEATURE ENGINEERING
+    ══════════════════════════════════════════ -->
+    <div class="phase-block" id="phase5">
+      <div class="phase-header">
+        <span class="phase-badge ph5">Fase 05</span>
+        <h2 class="phase-title">Feature Engineering</h2>
+      </div>
+
+      <div class="step-card" id="step-16">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">16</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Nuevas variables numéricas <span class="en-term">Numeric Features</span></div>
+            <div class="step-subtitle">Ratios, diferencias e interacciones entre variables existentes</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Las mejores features son las que el dominio de negocio sugiere, no las que se crean por probar. Un buen ratio puede ser más predictivo que diez variables crudas. Aplica siempre la misma transformación a train y test.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python · Pandas</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+            <div class="code-content"><span class="cm"># Ratio entre variables numéricas</span>
+X_train[<span class="st">'ratio_gasto_ingreso'</span>] = X_train[<span class="st">'gasto'</span>] / (X_train[<span class="st">'ingresos'</span>] + <span class="nb">1</span>)
+X_test[<span class="st">'ratio_gasto_ingreso'</span>]  = X_test[<span class="st">'gasto'</span>]  / (X_test[<span class="st">'ingresos'</span>]  + <span class="nb">1</span>)
+
+<span class="cm"># Diferencia absoluta</span>
+X_train[<span class="st">'diferencia_precio'</span>] = X_train[<span class="st">'precio_venta'</span>] - X_train[<span class="st">'precio_coste'</span>]
+X_test[<span class="st">'diferencia_precio'</span>]  = X_test[<span class="st">'precio_venta'</span>]  - X_test[<span class="st">'precio_coste'</span>]
+
+<span class="cm"># Variable binaria derivada</span>
+X_train[<span class="st">'es_fin_de_semana'</span>] = (X_train[<span class="st">'dia_semana'</span>] >= <span class="nb">5</span>).<span class="fn">astype</span>(<span class="kw">int</span>)
+X_test[<span class="st">'es_fin_de_semana'</span>]  = (X_test[<span class="st">'dia_semana'</span>]  >= <span class="nb">5</span>).<span class="fn">astype</span>(<span class="kw">int</span>)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card" id="step-17">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">17</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Extracción desde fechas <span class="en-term">Date Features</span></div>
+            <div class="step-subtitle">Año, mes, día de la semana, temporada, antigüedad...</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Las fechas en bruto no son útiles para los modelos. Extrae sus componentes significativos para capturar estacionalidad, tendencias o antigüedad.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python · Pandas</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+            <div class="code-content"><span class="kw">for</span> df_ <span class="kw">in</span> [X_train, X_test]:
+    df_[<span class="st">'anyo'</span>]       = pd.<span class="fn">to_datetime</span>(df_[<span class="st">'fecha'</span>]).dt.year
+    df_[<span class="st">'mes'</span>]        = pd.<span class="fn">to_datetime</span>(df_[<span class="st">'fecha'</span>]).dt.month
+    df_[<span class="st">'dia_semana'</span>]  = pd.<span class="fn">to_datetime</span>(df_[<span class="st">'fecha'</span>]).dt.dayofweek
+    df_[<span class="st">'trimestre'</span>]   = pd.<span class="fn">to_datetime</span>(df_[<span class="st">'fecha'</span>]).dt.quarter
+    df_[<span class="st">'antiguedad_dias'</span>] = (pd.<span class="fn">Timestamp</span>(<span class="st">'today'</span>) - pd.<span class="fn">to_datetime</span>(df_[<span class="st">'fecha'</span>])).dt.days
+    df_.<span class="fn">drop</span>(columns=[<span class="st">'fecha'</span>], inplace=<span class="kw">True</span>)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card" id="step-18">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">18</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Binning <span class="en-term">Discretization</span></div>
+            <div class="step-subtitle">Convierte variables continuas en categorías significativas</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">El binning puede capturar relaciones no lineales que un valor numérico continuo no transmitiría. Define los tramos con criterio de negocio, no de forma arbitraria.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python · Pandas</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+            <div class="code-content">bins   = [<span class="nb">0</span>, <span class="nb">25</span>, <span class="nb">40</span>, <span class="nb">60</span>, <span class="nb">100</span>]
+labels = [<span class="st">'joven'</span>, <span class="st">'adulto'</span>, <span class="st">'maduro'</span>, <span class="st">'senior'</span>]
+
+X_train[<span class="st">'tramo_edad'</span>] = pd.<span class="fn">cut</span>(X_train[<span class="st">'edad'</span>], bins=bins, labels=labels)
+X_test[<span class="st">'tramo_edad'</span>]  = pd.<span class="fn">cut</span>(X_test[<span class="st">'edad'</span>],  bins=bins, labels=labels)
+
+<span class="cm"># Binning por cuantiles (igual frecuencia por tramo)</span>
+X_train[<span class="st">'tramo_ingreso'</span>] = pd.<span class="fn">qcut</span>(X_train[<span class="st">'ingresos'</span>], q=<span class="nb">4</span>, labels=[<span class="st">'Q1'</span>,<span class="st">'Q2'</span>,<span class="st">'Q3'</span>,<span class="st">'Q4'</span>])
+X_test[<span class="st">'tramo_ingreso'</span>]  = pd.<span class="fn">cut</span>(X_test[<span class="st">'ingresos'</span>], bins=X_train[<span class="st">'ingresos'</span>].<span class="fn">quantile</span>([<span class="nb">0</span>,<span class="nb">.25</span>,<span class="nb">.5</span>,<span class="nb">.75</span>,<span class="nb">1</span>]), labels=[<span class="st">'Q1'</span>,<span class="st">'Q2'</span>,<span class="st">'Q3'</span>,<span class="st">'Q4'</span>])</div>
+          </div>
+          <ul class="checklist">
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Nuevas features creadas con criterio de negocio</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Misma transformación aplicada a train y test</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Correlación de las nuevas features con el target verificada</span></li>
+          </ul>
+        </div>
+      </div>
+
+    </div><!-- /phase5 -->
+    <div class="phase-divider"></div>
+
+    <!-- ══════════════════════════════════════════
+         FASE 6 · PREPROCESADO
+    ══════════════════════════════════════════ -->
+    <div class="phase-block" id="phase6">
+      <div class="phase-header">
+        <span class="phase-badge ph6">Fase 06</span>
+        <h2 class="phase-title">Preprocesado</h2>
+      </div>
+
+      <div class="step-card" id="step-19">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">19</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Eliminar columnas <span class="en-term">Feature Selection — Drop</span></div>
+            <div class="step-subtitle">Quita variables que no aporten al modelo</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Elimina identificadores únicos, columnas constantes y columnas con demasiados missings. Aplica el mismo drop a train y test.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python · Pandas</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+            <div class="code-content"><span class="cm"># Columnas específicas</span>
+cols_drop = [<span class="st">'id'</span>, <span class="st">'nombre'</span>]
+X_train.<span class="fn">drop</span>(columns=cols_drop, inplace=<span class="kw">True</span>)
+X_test.<span class="fn">drop</span>(columns=cols_drop,  inplace=<span class="kw">True</span>)
+
+<span class="cm"># Columnas con > 60% de missings</span>
+cols_nulos = X_train.columns[X_train.<span class="fn">isnull</span>().<span class="fn">mean</span>() > <span class="nb">0.6</span>]
+X_train.<span class="fn">drop</span>(columns=cols_nulos, inplace=<span class="kw">True</span>)
+X_test.<span class="fn">drop</span>(columns=cols_nulos,  inplace=<span class="kw">True</span>)
+
+<span class="cm"># Columnas constantes</span>
+cols_ctes = [c <span class="kw">for</span> c <span class="kw">in</span> X_train.columns <span class="kw">if</span> X_train[c].<span class="fn">nunique</span>() == <span class="nb">1</span>]
+X_train.<span class="fn">drop</span>(columns=cols_ctes, inplace=<span class="kw">True</span>)
+X_test.<span class="fn">drop</span>(columns=cols_ctes,  inplace=<span class="kw">True</span>)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card" id="step-20">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">20</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Missing Values <span class="en-term">Imputation</span></div>
+            <div class="step-subtitle">Imputa nulos — fit en train, transform en train y test</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">En ML los missings deben imputarse antes del modelado. El imputador se ajusta sobre train y se aplica sobre train y test por separado para evitar data leakage.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python · Scikit-learn</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+            <div class="code-content"><span class="kw">from</span> sklearn.impute <span class="kw">import</span> <span class="cl">SimpleImputer</span>
+
+cols_num = X_train.<span class="fn">select_dtypes</span>(include=<span class="st">'number'</span>).columns
+cols_cat = X_train.<span class="fn">select_dtypes</span>(include=<span class="st">'object'</span>).columns
+
+imp_num = <span class="cl">SimpleImputer</span>(strategy=<span class="st">'median'</span>)
+X_train[cols_num] = imp_num.<span class="fn">fit_transform</span>(X_train[cols_num])
+X_test[cols_num]  = imp_num.<span class="fn">transform</span>(X_test[cols_num])
+
+imp_cat = <span class="cl">SimpleImputer</span>(strategy=<span class="st">'most_frequent'</span>)
+X_train[cols_cat] = imp_cat.<span class="fn">fit_transform</span>(X_train[cols_cat])
+X_test[cols_cat]  = imp_cat.<span class="fn">transform</span>(X_test[cols_cat])</div>
+          </div>
+          <div class="warning-box"><strong>⚠️ Regla de oro:</strong> Siempre <code>fit</code> en train y <code>transform</code> en train y test. Nunca <code>fit_transform</code> en test.</div>
+        </div>
+      </div>
+
+      <div class="step-card" id="step-21">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">21</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Encoding categórico <span class="en-term">Categorical Encoding</span></div>
+            <div class="step-subtitle">Convierte strings en números para el modelo</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Los modelos de ML trabajan con números. Convierte las variables categóricas usando la técnica adecuada a su naturaleza.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python · Pandas + Scikit-learn</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+            <div class="code-content"><span class="cm"># Label Encoding — variables ordinales</span>
+orden = [<span class="st">'bajo'</span>, <span class="st">'medio'</span>, <span class="st">'alto'</span>]
+X_train[<span class="st">'nivel'</span>] = X_train[<span class="st">'nivel'</span>].<span class="fn">map</span>({v: i <span class="kw">for</span> i, v <span class="kw">in</span> <span class="fn">enumerate</span>(orden)})
+X_test[<span class="st">'nivel'</span>]  = X_test[<span class="st">'nivel'</span>].<span class="fn">map</span>({v: i <span class="kw">for</span> i, v <span class="kw">in</span> <span class="fn">enumerate</span>(orden)})
+
+<span class="cm"># One-Hot Encoding — variables nominales (baja cardinalidad)</span>
+X_train = pd.<span class="fn">get_dummies</span>(X_train, columns=[<span class="st">'ciudad'</span>], drop_first=<span class="kw">True</span>)
+X_test  = pd.<span class="fn">get_dummies</span>(X_test,  columns=[<span class="st">'ciudad'</span>], drop_first=<span class="kw">True</span>)
+X_test  = X_test.<span class="fn">reindex</span>(columns=X_train.columns, fill_value=<span class="nb">0</span>)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card" id="step-22">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">22</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Escalado <span class="en-term">Feature Scaling</span></div>
+            <div class="step-subtitle">Normaliza variables — necesario para modelos basados en distancias</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Necesario para KNN, SVM y modelos lineales. <strong>No es necesario</strong> para modelos basados en árboles (Random Forest, XGBoost).</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python · Scikit-learn</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+            <div class="code-content"><span class="kw">from</span> sklearn.preprocessing <span class="kw">import</span> <span class="cl">StandardScaler</span>
+<span class="kw">import</span> joblib
+
+cols_num = X_train.<span class="fn">select_dtypes</span>(include=<span class="st">'number'</span>).columns
+scaler = <span class="cl">StandardScaler</span>()
+X_train[cols_num] = scaler.<span class="fn">fit_transform</span>(X_train[cols_num])
+X_test[cols_num]  = scaler.<span class="fn">transform</span>(X_test[cols_num])
+joblib.<span class="fn">dump</span>(scaler, <span class="st">'src/models/scaler.joblib'</span>)</div>
+          </div>
+          <ul class="checklist">
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Missings imputados en train y test</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Variables categóricas codificadas</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Escalado aplicado si el modelo lo requiere</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Transformadores guardados en src/models/</span></li>
+          </ul>
+        </div>
+      </div>
+
+    </div><!-- /phase6 -->
+    <div class="phase-divider"></div>
+
+    <!-- ══════════════════════════════════════════
+         FASE 7 · MODELADO
+    ══════════════════════════════════════════ -->
+    <div class="phase-block" id="phase7">
+      <div class="phase-header">
+        <span class="phase-badge ph7">Fase 07</span>
+        <h2 class="phase-title">Modelado</h2>
+      </div>
+
+      <div class="step-card" id="step-23">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">23</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Métrica de evaluación <span class="en-term">Evaluation Metric</span></div>
+            <div class="step-subtitle">Define qué mides antes de entrenar ningún modelo</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">La elección de la métrica debe estar justificada por el contexto de negocio, no por lo que maximiza el número más alto.</p>
+          <div class="tip-box"><strong>💡 Ejemplo:</strong> En un modelo de detección de enfermedades, el Recall es más importante que el Accuracy. Es mejor falso positivo que falso negativo.</div>
+          <ul class="checklist">
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Métrica principal seleccionada y justificada</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Métricas secundarias de apoyo identificadas</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="step-card" id="step-24">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">24</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Modelo baseline <span class="en-term">Baseline Model</span></div>
+            <div class="step-subtitle">Establece la referencia mínima que debes superar</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">El baseline es la cota mínima de rendimiento. Si tu modelo avanzado no la supera, algo va muy mal.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python · Scikit-learn</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+            <div class="code-content"><span class="kw">from</span> sklearn.dummy <span class="kw">import</span> <span class="cl">DummyClassifier</span>, <span class="cl">DummyRegressor</span>
+<span class="kw">from</span> sklearn.model_selection <span class="kw">import</span> <span class="fn">cross_val_score</span>
+
+dummy_clf = <span class="cl">DummyClassifier</span>(strategy=<span class="st">'most_frequent'</span>)
+score = <span class="fn">cross_val_score</span>(dummy_clf, X_train, y_train, cv=<span class="nb">5</span>, scoring=<span class="st">'f1'</span>).<span class="fn">mean</span>()
+<span class="fn">print</span>(<span class="st">f"Baseline F1: {score:.3f}"</span>)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card" id="step-25">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">25</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Comparativa de modelos <span class="en-term">Model Comparison</span></div>
+            <div class="step-subtitle">Prueba varios algoritmos y documenta la comparativa</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Prueba al menos 3-4 algoritmos diferentes con sus parámetros por defecto. Usa validación cruzada sobre train para comparar de forma justa.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python · Scikit-learn</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+            <div class="code-content"><span class="kw">from</span> sklearn.linear_model <span class="kw">import</span> <span class="cl">LogisticRegression</span>
+<span class="kw">from</span> sklearn.ensemble <span class="kw">import</span> <span class="cl">RandomForestClassifier</span>, <span class="cl">GradientBoostingClassifier</span>
+<span class="kw">from</span> sklearn.tree <span class="kw">import</span> <span class="cl">DecisionTreeClassifier</span>
+
+modelos = {
+    <span class="st">'Logistic Regression'</span>: <span class="cl">LogisticRegression</span>(max_iter=<span class="nb">1000</span>),
+    <span class="st">'Decision Tree'</span>:       <span class="cl">DecisionTreeClassifier</span>(random_state=<span class="nb">42</span>),
+    <span class="st">'Random Forest'</span>:       <span class="cl">RandomForestClassifier</span>(random_state=<span class="nb">42</span>),
+    <span class="st">'Gradient Boosting'</span>:   <span class="cl">GradientBoostingClassifier</span>(random_state=<span class="nb">42</span>),
+}
+<span class="kw">for</span> nombre, modelo <span class="kw">in</span> modelos.<span class="fn">items</span>():
+    scores = <span class="fn">cross_val_score</span>(modelo, X_train, y_train, cv=<span class="nb">5</span>, scoring=<span class="st">'f1'</span>)
+    <span class="fn">print</span>(<span class="st">f"{nombre}: {scores.mean():.3f} ± {scores.std():.3f}"</span>)</div>
+          </div>
+          <ul class="checklist">
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Al menos 3 modelos comparados con validación cruzada</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Comparativa documentada en una tabla</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Modelo ganador seleccionado y justificado</span></li>
+          </ul>
+        </div>
+      </div>
+
+    </div><!-- /phase7 -->
+    <div class="phase-divider"></div>
+
+    <!-- ══════════════════════════════════════════
+         FASE 8 · OPTIMIZACIÓN
+    ══════════════════════════════════════════ -->
+    <div class="phase-block" id="phase8">
+      <div class="phase-header">
+        <span class="phase-badge ph8">Fase 08</span>
+        <h2 class="phase-title">Optimización de Hiperparámetros</h2>
+      </div>
+
+      <div class="step-card" id="step-26">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">26</div>
+          <div class="step-title-wrap">
+            <div class="step-title">GridSearchCV <span class="en-term">Exhaustive Search</span></div>
+            <div class="step-subtitle">Búsqueda exhaustiva — recomendada para espacios pequeños</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Prueba todas las combinaciones de hiperparámetros definidas. Más precisa pero más lenta. Ideal cuando el espacio de búsqueda es pequeño (menos de ~100 combinaciones).</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python · Scikit-learn</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+            <div class="code-content"><span class="kw">from</span> sklearn.model_selection <span class="kw">import</span> <span class="cl">GridSearchCV</span>
+<span class="kw">from</span> sklearn.ensemble <span class="kw">import</span> <span class="cl">RandomForestClassifier</span>
+
+param_grid = {
+    <span class="st">'n_estimators'</span>: [<span class="nb">100</span>, <span class="nb">200</span>, <span class="nb">300</span>],
+    <span class="st">'max_depth'</span>:    [<span class="kw">None</span>, <span class="nb">5</span>, <span class="nb">10</span>, <span class="nb">20</span>],
+    <span class="st">'min_samples_split'</span>: [<span class="nb">2</span>, <span class="nb">5</span>, <span class="nb">10</span>],
+}
+gs = <span class="cl">GridSearchCV</span>(<span class="cl">RandomForestClassifier</span>(random_state=<span class="nb">42</span>),
+                  param_grid, cv=<span class="nb">5</span>, scoring=<span class="st">'f1'</span>, n_jobs=<span class="nb">-1</span>)
+gs.<span class="fn">fit</span>(X_train, y_train)
+<span class="fn">print</span>(<span class="st">f"Mejores params: {gs.best_params_}"</span>)
+<span class="fn">print</span>(<span class="st">f"Mejor F1 CV:    {gs.best_score_:.3f}"</span>)
+best_model = gs.best_estimator_</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card" id="step-27">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">27</div>
+          <div class="step-title-wrap">
+            <div class="step-title">RandomizedSearchCV <span class="en-term">Random Search</span></div>
+            <div class="step-subtitle">Búsqueda aleatoria — recomendada para espacios grandes</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Prueba una muestra aleatoria del espacio de hiperparámetros. Mucho más eficiente que GridSearch cuando hay muchas combinaciones posibles.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python · Scikit-learn</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+            <div class="code-content"><span class="kw">from</span> sklearn.model_selection <span class="kw">import</span> <span class="cl">RandomizedSearchCV</span>
+<span class="kw">from</span> scipy.stats <span class="kw">import</span> randint, uniform
+
+param_dist = {
+    <span class="st">'n_estimators'</span>: <span class="fn">randint</span>(<span class="nb">50</span>, <span class="nb">500</span>),
+    <span class="st">'max_depth'</span>:    [<span class="kw">None</span>, <span class="nb">5</span>, <span class="nb">10</span>, <span class="nb">15</span>, <span class="nb">20</span>],
+    <span class="st">'max_features'</span>: <span class="fn">uniform</span>(<span class="nb">0.1</span>, <span class="nb">0.9</span>),
+}
+rs = <span class="cl">RandomizedSearchCV</span>(<span class="cl">RandomForestClassifier</span>(random_state=<span class="nb">42</span>),
+                        param_dist, n_iter=<span class="nb">50</span>, cv=<span class="nb">5</span>,
+                        scoring=<span class="st">'f1'</span>, n_jobs=<span class="nb">-1</span>, random_state=<span class="nb">42</span>)
+rs.<span class="fn">fit</span>(X_train, y_train)
+<span class="fn">print</span>(<span class="st">f"Mejores params: {rs.best_params_}"</span>)
+<span class="fn">print</span>(<span class="st">f"Mejor F1 CV:    {rs.best_score_:.3f}"</span>)</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /phase8 -->
+    <div class="phase-divider"></div>
+
+    <!-- ══════════════════════════════════════════
+         FASE 9 · EVALUACIÓN FINAL
+    ══════════════════════════════════════════ -->
+    <div class="phase-block" id="phase9">
+      <div class="phase-header">
+        <span class="phase-badge ph9">Fase 09</span>
+        <h2 class="phase-title">Evaluación Final</h2>
+      </div>
+
+      <div class="step-card" id="step-28">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">28</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Evaluación contra test <span class="en-term">Final Evaluation</span></div>
+            <div class="step-subtitle">Primer y único uso del conjunto de test</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Con el modelo final optimizado, evalúa sobre el conjunto de test. Este es el resultado real del modelo frente a datos no vistos.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python · Scikit-learn</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+            <div class="code-content"><span class="kw">from</span> sklearn.metrics <span class="kw">import</span> classification_report, confusion_matrix, roc_auc_score
+
+y_pred = best_model.<span class="fn">predict</span>(X_test)
+y_prob = best_model.<span class="fn">predict_proba</span>(X_test)[:, <span class="nb">1</span>]
+
+<span class="fn">print</span>(<span class="fn">classification_report</span>(y_test, y_pred))
+<span class="fn">print</span>(<span class="st">f"ROC-AUC: {roc_auc_score(y_test, y_prob):.3f}"</span>)
+
+cm = <span class="fn">confusion_matrix</span>(y_test, y_pred)
+sns.<span class="fn">heatmap</span>(cm, annot=<span class="kw">True</span>, fmt=<span class="st">'d'</span>, cmap=<span class="st">'Purples'</span>)
+plt.<span class="fn">show</span>()</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card" id="step-29">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">29</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Interpretabilidad <span class="en-term">Feature Importance</span></div>
+            <div class="step-subtitle">¿Qué variables han sido más importantes para el modelo?</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Entiende por qué el modelo hace las predicciones que hace. La interpretabilidad cierra el círculo con el problema de negocio.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python · Pandas + Matplotlib</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+            <div class="code-content">importances = pd.<span class="fn">Series</span>(
+    best_model.feature_importances_,
+    index=X_train.columns
+).<span class="fn">sort_values</span>(ascending=<span class="kw">False</span>)
+
+importances.<span class="fn">head</span>(<span class="nb">15</span>).<span class="fn">plot</span>(kind=<span class="st">'barh'</span>)
+plt.<span class="fn">title</span>(<span class="st">'Top 15 features más importantes'</span>)
+plt.<span class="fn">show</span>()</div>
+          </div>
+          <ul class="checklist">
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Resultados del modelo comparados con el baseline</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Rendimiento suficiente para el plan de acción definido</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Limitaciones del modelo identificadas y documentadas</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Conclusiones expresadas en términos de negocio</span></li>
+          </ul>
+        </div>
+      </div>
+
+    </div><!-- /phase9 -->
+    <div class="phase-divider"></div>
+
+    <!-- ══════════════════════════════════════════
+         FASE 10 · PERSISTENCIA & ENTREGABLES
+    ══════════════════════════════════════════ -->
+    <div class="phase-block" id="phase10">
+      <div class="phase-header">
+        <span class="phase-badge ph10">Fase 10</span>
+        <h2 class="phase-title">Persistencia & Entregables</h2>
+      </div>
+
+      <div class="step-card" id="step-30">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">30</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Guardar el modelo <span class="en-term">Model Persistence</span></div>
+            <div class="step-subtitle">Exporta el modelo y los transformadores — último paso del notebook</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Guarda el modelo entrenado y los transformadores en formato <code>joblib</code> o <code>pickle</code>. Este debe ser el último paso del <code>main.ipynb</code>.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Python · Joblib</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+            <div class="code-content"><span class="kw">import</span> joblib, os
+os.<span class="fn">makedirs</span>(<span class="st">'src/models'</span>, exist_ok=<span class="kw">True</span>)
+
+joblib.<span class="fn">dump</span>(best_model, <span class="st">'src/models/model_final.joblib'</span>)
+joblib.<span class="fn">dump</span>(scaler,     <span class="st">'src/models/scaler.joblib'</span>)
+joblib.<span class="fn">dump</span>(imp_num,   <span class="st">'src/models/imputer_num.joblib'</span>)
+
+<span class="fn">print</span>(<span class="st">"✅ Modelo y preprocesadores guardados en src/models/"</span>)
+
+<span class="cm"># Verificar carga</span>
+model_loaded = joblib.<span class="fn">load</span>(<span class="st">'src/models/model_final.joblib'</span>)
+<span class="fn">print</span>(<span class="st">f"Modelo cargado: {type(model_loaded).__name__}"</span>)</div>
+          </div>
+          <ul class="checklist">
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Modelo guardado en src/models/ en formato joblib o pickle</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Preprocesadores guardados junto al modelo</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Carga del modelo verificada</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="step-card" id="step-31">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">31</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Limpieza del notebook <span class="en-term">main.ipynb</span></div>
+            <div class="step-subtitle">El notebook final debe ser limpio, claro y ejecutable</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">El <code>main.ipynb</code> no es tu notebook de trabajo. Es la versión final y limpia del pipeline, sin pruebas ni alternativas descartadas.</p>
+          <ul class="checklist">
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Sin celdas de prueba ni alternativas descartadas</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Headers claros en cada sección</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Decisiones técnicas comentadas en markdown</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Se ejecuta de principio a fin sin errores</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="step-card" id="step-32">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">32</div>
+          <div class="step-title-wrap">
+            <div class="step-title">Presentación y vídeo <span class="en-term">Storytelling</span></div>
+            <div class="step-subtitle">Comunica el proceso y los resultados con un hilo conductor</div>
+          </div>
+          <span class="step-toggle">▾</span>
+        </div>
+        <div class="step-body">
+          <p class="step-desc">Esta presentación <strong>puede incluir información técnica y fragmentos de código</strong>. El objetivo es comunicar de forma clara el problema, la solución y los resultados.</p>
+          <div class="tip-box"><strong>💡 Estructura recomendada:</strong> Problema de negocio (15%) → Planteamiento técnico (15%) → Dataset y EDA (20%) → Modelado y resultados (30%) → Conclusiones (20%)</div>
+          <div class="warning-box"><strong>⚠️ Recuerda:</strong> Una acción de mejora NUNCA debe ser "probar con X modelo". Si quieres probarlo, pruébalo y evalúa su rendimiento.</div>
+          <ul class="checklist">
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Presentación PDF con estructura recomendada</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Hilo conductor claro: problema → solución → resultados</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Vídeo MP4 de 7-9 minutos grabado</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Todos los miembros del equipo participan</span></li>
+            <li onclick="toggleCheck(this)"><span class="check-box"></span><span>Conclusiones ligadas al problema de negocio</span></li>
+          </ul>
+        </div>
+      </div>
+
+    </div><!-- /phase10 -->
+
+  </div><!-- /content-area -->
+</main>
+
+<script>
+  // ── Accordion de pasos ─────────────────────────
+  function toggleStep(header) {
+    header.parentElement.classList.toggle('open');
+  }
+
+  // ── Checklist interactivo ──────────────────────
+  function toggleCheck(li) {
+    li.classList.toggle('checked');
+    updateProgress();
+    updatePhaseProgress();
+  }
+
+  // ── Progreso total ─────────────────────────────
+  function updateProgress() {
+    const all  = document.querySelectorAll('.checklist li');
+    const done = document.querySelectorAll('.checklist li.checked').length;
+    const pct  = all.length > 0 ? Math.round((done / all.length) * 100) : 0;
+    document.getElementById('progressBar').style.width = pct + '%';
+    document.getElementById('progressCount').textContent = done + ' / ' + all.length + ' checks';
+  }
+
+  // ── Progreso por fase (mini barra en nav) ──────
+  function updatePhaseProgress() {
+    const phases = ['phase1','phase2','phase3','phase4','phase5','phase6','phase7','phase8','phase9','phase10'];
+    phases.forEach((phId, i) => {
+      const block = document.getElementById(phId);
+      if (!block) return;
+      const all  = block.querySelectorAll('.checklist li').length;
+      const done = block.querySelectorAll('.checklist li.checked').length;
+      const pct  = all > 0 ? Math.round((done / all) * 100) : 0;
+      const bar  = document.getElementById('pbar' + (i + 1));
+      if (bar) bar.style.width = pct + '%';
+      // Mark nav item as done when 100%
+      const navItem = document.querySelector('[data-phase="' + phId + '"]');
+      if (navItem) navItem.classList.toggle('done', all > 0 && done === all);
+    });
+  }
+
+  // ── Scroll suave al hacer click en nav ─────────
+  function navClick(el, id) {
+    const target = document.getElementById(id);
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // ── Resaltar fase activa al hacer scroll ───────
+  const mainEl   = document.getElementById('main');
+  const navItems = document.querySelectorAll('.nav-item');
+  const phaseIds = ['phase1','phase2','phase3','phase4','phase5','phase6','phase7','phase8','phase9','phase10'];
+
+  function updateActiveNav() {
+    const scrollTop = mainEl.scrollTop;
+    const viewH     = mainEl.clientHeight;
+    let current     = 0;
+    phaseIds.forEach((id, i) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const containerTop = mainEl.getBoundingClientRect().top;
+      if (rect.top - containerTop < viewH * 0.4) current = i;
+    });
+    navItems.forEach((item, i) => {
+      item.classList.toggle('active', i === current);
+    });
+    // Auto-scroll sidebar nav item into view
+    const activeItem = navItems[current];
+    if (activeItem) {
+      activeItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+  }
+
+  mainEl.addEventListener('scroll', updateActiveNav, { passive: true });
+
+  // ── Colapsar/expandir sidebar ──────────────────
+  const sidebar = document.getElementById('sidebar');
+  document.getElementById('sidebarToggle').addEventListener('click', () => {
+    sidebar.classList.toggle('collapsed');
+  });
+
+  // ── Copiar código ──────────────────────────────
+  function copyCode(btn) {
+    const text = btn.closest('.code-block').querySelector('.code-content').innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = '¡Copiado!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copiar'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  // ── Init ───────────────────────────────────────
+  updateProgress();
+  updatePhaseProgress();
+</script>
+</body>
+</html>
