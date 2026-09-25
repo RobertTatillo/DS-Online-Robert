@@ -21,3 +21,6 @@ __pycache__/
 .vscode/
 .DS_Store
 Thumbs.db
+
+# Espejo local de SQLite (se regenera con los notebooks)
+data/*.db

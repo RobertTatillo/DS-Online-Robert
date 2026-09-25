@@ -1,0 +1,8 @@
+# El fichero completo del INE pesa 262MB y GitHub no admite ficheros de mas de 100MB.
+# En el repo subimos solo la muestra (muestra_nacimientos_2024.parquet).
+src/data_sample/MNPnacim_2024.sav
+
+# Cosas de Python / Jupyter que no pintan nada en el repo
+__pycache__/
+.ipynb_checkpoints/
+*.pyc
